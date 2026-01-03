@@ -1,79 +1,62 @@
-name: Liftoff CLI Project Generator
+name: Liftoff LibGDX CLI
 
 on:
-  push:
-    branches:
-      - cli-first
   workflow_dispatch:
     inputs:
       projectName:
-        description: 'Name of the libGDX project'
-        required: false
-        default: 'MyLiftoffProject'
+        description: 'Nome do projeto'
+        required: true
+        default: 'MyLibGDXProject'
       packageName:
-        description: 'Java package (e.g., com.example)'
-        required: false
-        default: 'com.example.myliftoff'
+        description: 'Pacote base do projeto'
+        required: true
+        default: 'com.yourcompany.liftoff'
       mainClassName:
-        description: 'Main class name'
+        description: 'Nome da classe principal'
+        required: true
+        default: 'Main'
+      projectPath:
+        description: 'Caminho do projeto'
         required: false
-        default: 'MainGame'
+        default: './'
       platforms:
-        description: 'Comma-separated list of platforms (e.g., core,desktop)'
+        description: 'Plataformas separadas por vírgula'
         required: false
-        default: 'core,desktop'
+        default: 'core,desktop,android'
       extensions:
-        description: 'Comma-separated list of extensions'
+        description: 'Extensões separadas por vírgula'
         required: false
         default: ''
       addReadme:
-        description: 'Whether to include README'
+        description: 'Adicionar README?'
         required: false
         default: 'true'
       addGuiAssets:
-        description: 'Whether to include GUI assets'
+        description: 'Adicionar assets GUI?'
         required: false
         default: 'true'
 
 jobs:
-  generate-project:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Compile CLI entrypoint
+      - name: Build and run MainCli
         run: |
-          mkdir -p out
-          javac -d out \
-            src/main/java/com/yourcompany/liftoff/MainCli.java \
-            src/main/java/com/yourcompany/liftoff/*.java
-
-      - name: Run Liftoff CLI to generate project
-        run: |
-          mkdir -p generated/${{ github.event.inputs.projectName }}
-          java -cp out com.yourcompany.liftoff.MainCli \
+          java -cp . com.yourcompany.liftoff.MainCli \
             --projectName=${{ github.event.inputs.projectName }} \
             --packageName=${{ github.event.inputs.packageName }} \
             --mainClassName=${{ github.event.inputs.mainClassName }} \
+            --projectPath=${{ github.event.inputs.projectPath }} \
             --platforms=${{ github.event.inputs.platforms }} \
             --extensions=${{ github.event.inputs.extensions }} \
             --addReadme=${{ github.event.inputs.addReadme }} \
-            --addGuiAssets=${{ github.event.inputs.addGuiAssets }} \
-            --projectPath=$(pwd)/generated/${{ github.event.inputs.projectName }}
-
-      - name: Show generated files
-        run: ls -R generated/
-
-      - name: Upload generated project
-        uses: actions/upload-artifact@v4
-        with:
-          name: liftoff-generated-project
-          path: generated/
+            --addGuiAssets=${{ github.event.inputs.addGuiAssets }}
