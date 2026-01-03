@@ -1,0 +1,76 @@
+name: Liftoff CLI Project Generator
+
+on:
+  workflow_dispatch:
+    inputs:
+      projectName:
+        description: 'Name of the libGDX project'
+        required: false
+        default: 'MyLiftoffProject'
+      packageName:
+        description: 'Java package (e.g., com.example)'
+        required: false
+        default: 'com.example.myliftoff'
+      mainClassName:
+        description: 'Main class name'
+        required: false
+        default: 'MainGame'
+      platforms:
+        description: 'Comma-separated list of platforms (e.g., core,desktop)'
+        required: false
+        default: 'core,desktop'
+      extensions:
+        description: 'Comma-separated list of extensions'
+        required: false
+        default: ''
+      addReadme:
+        description: 'Whether to include README'
+        required: false
+        default: 'true'
+      addGuiAssets:
+        description: 'Whether to include GUI assets'
+        required: false
+        default: 'true'
+
+jobs:
+  generate-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Compile CLI entrypoint
+        run: |
+          mkdir -p out
+          javac -d out \
+            src/main/java/com/yourcompany/liftoff/MainCli.java \
+            src/main/java/com/yourcompany/liftoff/*.java
+
+      - name: Run Liftoff CLI to generate project
+        run: |
+          mkdir -p generated/${{ github.event.inputs.projectName }}
+          java -cp out com.yourcompany.liftoff.MainCli \
+            --projectName=${{ github.event.inputs.projectName }} \
+            --packageName=${{ github.event.inputs.packageName }} \
+            --mainClassName=${{ github.event.inputs.mainClassName }} \
+            --platforms=${{ github.event.inputs.platforms }} \
+            --extensions=${{ github.event.inputs.extensions }} \
+            --addReadme=${{ github.event.inputs.addReadme }} \
+            --addGuiAssets=${{ github.event.inputs.addGuiAssets }} \
+            --projectPath=$(pwd)/generated/${{ github.event.inputs.projectName }}
+
+      - name: Show generated files
+        run: ls -R generated/
+
+      - name: Upload generated project
+        uses: actions/upload-artifact@v4
+        with:
+          name: liftoff-generated-project
+          path: generated/
