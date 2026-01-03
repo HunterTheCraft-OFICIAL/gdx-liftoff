@@ -1,6 +1,9 @@
 name: Liftoff CLI Project Generator
 
 on:
+  push:
+    branches:
+      - cli-first
   workflow_dispatch:
     inputs:
       projectName:
