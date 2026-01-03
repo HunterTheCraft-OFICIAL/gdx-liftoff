@@ -1,62 +1,146 @@
-name: Liftoff LibGDX CLI
+name: Liftoff Project CLI
 
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        description: "Escolha a branch para executar o workflow"
+        required: true
+        default: "development"
       projectName:
-        description: 'Nome do projeto'
+        description: "Nome do projeto"
         required: true
-        default: 'MyLibGDXProject'
+        default: "MyGame"
       packageName:
-        description: 'Pacote base do projeto'
+        description: "Pacote Java"
         required: true
-        default: 'com.yourcompany.liftoff'
+        default: "com.example.mygame"
       mainClassName:
-        description: 'Nome da classe principal'
+        description: "Classe principal"
         required: true
-        default: 'Main'
+        default: "MainGame"
       projectPath:
-        description: 'Caminho do projeto'
+        description: "Caminho do projeto"
+        required: true
+        default: "./"
+      androidPath:
+        description: "Caminho do Android"
         required: false
-        default: './'
+        default: "./android"
+      libgdxVersion:
+        description: "Versão do LibGDX"
+        required: true
+        default: "1.12.0"
+      javaVersion:
+        description: "Versão do Java"
+        required: true
+        default: "17"
+      appVersion:
+        description: "Versão do App"
+        required: true
+        default: "1.0"
+      gwtPluginVersion:
+        description: "Versão do plugin GWT"
+        required: true
+        default: "2.9.0"
       platforms:
-        description: 'Plataformas separadas por vírgula'
+        description: "Plataformas (separadas por vírgula)"
         required: false
-        default: 'core,desktop,android'
+        default: "desktop,android"
       extensions:
-        description: 'Extensões separadas por vírgula'
+        description: "Extensões (separadas por vírgula)"
         required: false
-        default: ''
+        default: ""
+      thirdPartyLibs:
+        description: "Bibliotecas de terceiros (separadas por vírgula)"
+        required: false
+        default: ""
       addReadme:
-        description: 'Adicionar README?'
+        description: "Adicionar README? true/false"
         required: false
-        default: 'true'
+        default: "true"
       addGuiAssets:
-        description: 'Adicionar assets GUI?'
+        description: "Adicionar GUI Assets? true/false"
         required: false
-        default: 'true'
+        default: "true"
+      gradleTasks:
+        description: "Tarefas Gradle (separadas por vírgula)"
+        required: false
+        default: "clean,build"
 
 jobs:
-  build:
+  collect-inputs:
+    name: Coletar Inputs
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.set-outputs.outputs.branch }}
+      projectName: ${{ steps.set-outputs.outputs.projectName }}
+      packageName: ${{ steps.set-outputs.outputs.packageName }}
+      mainClassName: ${{ steps.set-outputs.outputs.mainClassName }}
+      projectPath: ${{ steps.set-outputs.outputs.projectPath }}
+      androidPath: ${{ steps.set-outputs.outputs.androidPath }}
+      libgdxVersion: ${{ steps.set-outputs.outputs.libgdxVersion }}
+      javaVersion: ${{ steps.set-outputs.outputs.javaVersion }}
+      appVersion: ${{ steps.set-outputs.outputs.appVersion }}
+      gwtPluginVersion: ${{ steps.set-outputs.outputs.gwtPluginVersion }}
+      platforms: ${{ steps.set-outputs.outputs.platforms }}
+      extensions: ${{ steps.set-outputs.outputs.extensions }}
+      thirdPartyLibs: ${{ steps.set-outputs.outputs.thirdPartyLibs }}
+      addReadme: ${{ steps.set-outputs.outputs.addReadme }}
+      addGuiAssets: ${{ steps.set-outputs.outputs.addGuiAssets }}
+      gradleTasks: ${{ steps.set-outputs.outputs.gradleTasks }}
+    steps:
+      - name: Set workflow outputs
+        id: set-outputs
+        run: |
+          echo "branch=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
+          echo "projectName=${{ github.event.inputs.projectName }}" >> $GITHUB_OUTPUT
+          echo "packageName=${{ github.event.inputs.packageName }}" >> $GITHUB_OUTPUT
+          echo "mainClassName=${{ github.event.inputs.mainClassName }}" >> $GITHUB_OUTPUT
+          echo "projectPath=${{ github.event.inputs.projectPath }}" >> $GITHUB_OUTPUT
+          echo "androidPath=${{ github.event.inputs.androidPath }}" >> $GITHUB_OUTPUT
+          echo "libgdxVersion=${{ github.event.inputs.libgdxVersion }}" >> $GITHUB_OUTPUT
+          echo "javaVersion=${{ github.event.inputs.javaVersion }}" >> $GITHUB_OUTPUT
+          echo "appVersion=${{ github.event.inputs.appVersion }}" >> $GITHUB_OUTPUT
+          echo "gwtPluginVersion=${{ github.event.inputs.gwtPluginVersion }}" >> $GITHUB_OUTPUT
+          echo "platforms=${{ github.event.inputs.platforms }}" >> $GITHUB_OUTPUT
+          echo "extensions=${{ github.event.inputs.extensions }}" >> $GITHUB_OUTPUT
+          echo "thirdPartyLibs=${{ github.event.inputs.thirdPartyLibs }}" >> $GITHUB_OUTPUT
+          echo "addReadme=${{ github.event.inputs.addReadme }}" >> $GITHUB_OUTPUT
+          echo "addGuiAssets=${{ github.event.inputs.addGuiAssets }}" >> $GITHUB_OUTPUT
+          echo "gradleTasks=${{ github.event.inputs.gradleTasks }}" >> $GITHUB_OUTPUT
+
+  run-liftoff:
+    name: Executar Liftoff CLI
+    needs: collect-inputs
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout selected branch
         uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.collect-inputs.outputs.branch }}
 
-      - name: Set up Java
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: ${{ needs.collect-inputs.outputs.javaVersion }}
 
-      - name: Build and run MainCli
+      - name: Run Liftoff CLI
         run: |
-          java -cp . com.yourcompany.liftoff.MainCli \
-            --projectName=${{ github.event.inputs.projectName }} \
-            --packageName=${{ github.event.inputs.packageName }} \
-            --mainClassName=${{ github.event.inputs.mainClassName }} \
-            --projectPath=${{ github.event.inputs.projectPath }} \
-            --platforms=${{ github.event.inputs.platforms }} \
-            --extensions=${{ github.event.inputs.extensions }} \
-            --addReadme=${{ github.event.inputs.addReadme }} \
-            --addGuiAssets=${{ github.event.inputs.addGuiAssets }}
+          java -cp ./path/to/your/classes gdx.liftoff.MainCli \
+            --projectName="${{ needs.collect-inputs.outputs.projectName }}" \
+            --packageName="${{ needs.collect-inputs.outputs.packageName }}" \
+            --mainClassName="${{ needs.collect-inputs.outputs.mainClassName }}" \
+            --projectPath="${{ needs.collect-inputs.outputs.projectPath }}" \
+            --androidPath="${{ needs.collect-inputs.outputs.androidPath }}" \
+            --libgdxVersion="${{ needs.collect-inputs.outputs.libgdxVersion }}" \
+            --javaVersion="${{ needs.collect-inputs.outputs.javaVersion }}" \
+            --appVersion="${{ needs.collect-inputs.outputs.appVersion }}" \
+            --gwtPluginVersion="${{ needs.collect-inputs.outputs.gwtPluginVersion }}" \
+            --platforms="${{ needs.collect-inputs.outputs.platforms }}" \
+            --extensions="${{ needs.collect-inputs.outputs.extensions }}" \
+            --thirdPartyLibs="${{ needs.collect-inputs.outputs.thirdPartyLibs }}" \
+            --addReadme="${{ needs.collect-inputs.outputs.addReadme }}" \
+            --addGuiAssets="${{ needs.collect-inputs.outputs.addGuiAssets }}" \
+            --gradleTasks="${{ needs.collect-inputs.outputs.gradleTasks }}"
