@@ -1,118 +1,171 @@
-name: Liftoff CLI Project Generator
+name: Liftoff CLI Project Setup
 
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: "Branch para executar o workflow"
+      # --- Platforms ---
+      platform:
+        description: "Select target platform"
         required: true
-        default: "cli-first"
-      projectName:
-        description: "Nome do projeto"
+        type: choice
+        options:
+          - Android
+          - Core
+          - GWT
+          - Headless
+          - IOS
+          - IOSMOE
+          - Lwjgl2
+          - Lwjgl3
+          - Server
+          - Shared
+          - TeaVM
+
+      # --- Languages ---
+      language:
+        description: "Select programming language"
         required: true
-        default: "MyLiftoffProject"
-      packageName:
-        description: "Pacote Java"
+        type: choice
+        options:
+          - Kotlin
+          - Groovy
+          - Scala
+
+      # --- Templates ---
+      template:
+        description: "Select project template"
         required: true
-        default: "com.example.myliftoff"
-      mainClassName:
-        description: "Classe principal"
-        required: true
-        default: "MainGame"
-      projectPath:
-        description: "Caminho do projeto"
+        type: choice
+        options:
+          - ClassicTemplate
+          - ApplicationAdapterTemplate
+          - ApplicationListenerTemplate
+          - EmptyTemplate
+          - GameTemplate
+          - InputProcessorTemplate
+          - KotlinBasicTemplate
+          - KotlinClassicTemplate
+          - Scene2DTemplate
+          - SuperKoalioTemplate
+          - IsometricVoxelTemplate
+          - AutumnMvcBasicTemplate
+          - AutumnMvcBox2dTemplate
+          - AutumnMvcVisTemplate
+          - KiwiInputTemplate
+          - KiwiTemplate
+          - KtxTemplate
+          - LmlTemplate
+          - Noise4JTemplate
+          - VisUIBasicTemplate
+          - VisUIShowcaseTemplate
+
+      # --- Official Libraries (booleans) ---
+      AI:
+        description: "Include AI library?"
         required: false
-        default: "./generated"
-      androidPath:
-        description: "Caminho do Android"
+        default: true
+        type: boolean
+      Ashley:
+        description: "Include Ashley library?"
         required: false
-        default: "./android"
-      libgdxVersion:
-        description: "Versão do LibGDX"
+        default: true
+        type: boolean
+      Box2D:
+        description: "Include Box2D library?"
         required: false
-        default: "1.12.0"
-      javaVersion:
-        description: "Versão do Java"
+        default: true
+        type: boolean
+      Box2DLights:
+        description: "Include Box2DLights library?"
         required: false
-        default: "17"
-      appVersion:
-        description: "Versão do App"
+        default: true
+        type: boolean
+      Bullet:
+        description: "Include Bullet library?"
         required: false
-        default: "1.0"
-      gwtPluginVersion:
-        description: "Versão do plugin GWT"
+        default: true
+        type: boolean
+      Controllers:
+        description: "Include Controllers library?"
         required: false
-        default: "2.9.0"
-      platforms:
-        description: "Plataformas (separadas por vírgula)"
+        default: true
+        type: boolean
+      Freetype:
+        description: "Include Freetype library?"
         required: false
-        default: "core,desktop"
-      extensions:
-        description: "Extensões (separadas por vírgula)"
+        default: true
+        type: boolean
+      Tools:
+        description: "Include Tools library?"
+        required: false
+        default: true
+        type: boolean
+
+      # --- Unofficial Libraries (comma-separated) ---
+      unofficial_libs:
+        description: "Add unofficial libraries (comma-separated IDs)"
         required: false
         default: ""
-      thirdPartyLibs:
-        description: "Bibliotecas de terceiros (separadas por vírgula)"
+        type: string
+
+      # --- Optional Flags ---
+      headless:
+        description: "Run in headless mode?"
         required: false
-        default: ""
-      addReadme:
-        description: "Adicionar README? true/false"
+        default: false
+        type: boolean
+      debug:
+        description: "Enable debug mode?"
         required: false
-        default: "true"
-      addGuiAssets:
-        description: "Adicionar GUI Assets? true/false"
-        required: false
-        default: "true"
-      gradleTasks:
-        description: "Tarefas Gradle (separadas por vírgula)"
-        required: false
-        default: "clean,build"
+        default: false
+        type: boolean
 
 jobs:
-  generate-project:
+  liftoff_cli:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout selected branch
+      - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch }}
 
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: ${{ github.event.inputs.javaVersion }}
+          java-version: 17
 
-      - name: Compile CLI classes
+      - name: Build CLI command
+        id: build_command
         run: |
-          mkdir -p out
-          javac -d out src/main/java/gdx/liftoff/*.java
+          CMD="java -jar liftoff-cli.jar"
+          CMD="$CMD --platform ${{ github.event.inputs.platform }}"
+          CMD="$CMD --language ${{ github.event.inputs.language }}"
+          CMD="$CMD --template ${{ github.event.inputs.template }}"
+
+          # Add official libraries if enabled
+          for lib in AI Ashley Box2D Box2DLights Bullet Controllers Freetype Tools; do
+            VAL="${{ github.event.inputs[lib] }}"
+            if [ "$VAL" = "true" ]; then
+              CMD="$CMD --libs $lib"
+            fi
+          done
+
+          # Add unofficial libraries
+          if [ -n "${{ github.event.inputs.unofficial_libs }}" ]; then
+            CMD="$CMD --libs ${{ github.event.inputs.unofficial_libs }}"
+          fi
+
+          # Add flags
+          if [ "${{ github.event.inputs.headless }}" = "true" ]; then
+            CMD="$CMD --headless"
+          fi
+          if [ "${{ github.event.inputs.debug }}" = "true" ]; then
+            CMD="$CMD --debug"
+          fi
+
+          echo "CLI_COMMAND=$CMD" >> $GITHUB_ENV
 
       - name: Run Liftoff CLI
         run: |
-          mkdir -p "${{ github.event.inputs.projectPath }}/${{ github.event.inputs.projectName }}"
-          java -cp out gdx.liftoff.MainCli \
-            --projectName="${{ github.event.inputs.projectName }}" \
-            --packageName="${{ github.event.inputs.packageName }}" \
-            --mainClassName="${{ github.event.inputs.mainClassName }}" \
-            --projectPath="${{ github.event.inputs.projectPath }}/${{ github.event.inputs.projectName }}" \
-            --androidPath="${{ github.event.inputs.androidPath }}" \
-            --libgdxVersion="${{ github.event.inputs.libgdxVersion }}" \
-            --javaVersion="${{ github.event.inputs.javaVersion }}" \
-            --appVersion="${{ github.event.inputs.appVersion }}" \
-            --gwtPluginVersion="${{ github.event.inputs.gwtPluginVersion }}" \
-            --platforms="${{ github.event.inputs.platforms }}" \
-            --extensions="${{ github.event.inputs.extensions }}" \
-            --thirdPartyLibs="${{ github.event.inputs.thirdPartyLibs }}" \
-            --addReadme="${{ github.event.inputs.addReadme }}" \
-            --addGuiAssets="${{ github.event.inputs.addGuiAssets }}" \
-            --gradleTasks="${{ github.event.inputs.gradleTasks }}"
-
-      - name: Show generated files
-        run: ls -R "${{ github.event.inputs.projectPath }}"
-
-      - name: Upload generated project artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: liftoff-generated-project
-          path: ${{ github.event.inputs.projectPath }}
+          echo "Executing Liftoff CLI..."
+          echo $CLI_COMMAND
+          eval $CLI_COMMAND
