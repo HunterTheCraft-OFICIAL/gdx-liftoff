@@ -1,0 +1,118 @@
+name: Liftoff CLI Project Generator 2
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch para executar o workflow"
+        required: true
+        default: "cli-first"
+      projectName:
+        description: "Nome do projeto"
+        required: true
+        default: "MyLiftoffProject"
+      packageName:
+        description: "Pacote Java"
+        required: true
+        default: "com.example.myliftoff"
+      mainClassName:
+        description: "Classe principal"
+        required: true
+        default: "MainGame"
+      projectPath:
+        description: "Caminho do projeto"
+        required: false
+        default: "./generated"
+      androidPath:
+        description: "Caminho do Android"
+        required: false
+        default: "./android"
+      libgdxVersion:
+        description: "Versão do LibGDX"
+        required: false
+        default: "1.12.0"
+      javaVersion:
+        description: "Versão do Java"
+        required: false
+        default: "17"
+      appVersion:
+        description: "Versão do App"
+        required: false
+        default: "1.0"
+      gwtPluginVersion:
+        description: "Versão do plugin GWT"
+        required: false
+        default: "2.9.0"
+      platforms:
+        description: "Plataformas (separadas por vírgula)"
+        required: false
+        default: "core,desktop"
+      extensions:
+        description: "Extensões (separadas por vírgula)"
+        required: false
+        default: ""
+      thirdPartyLibs:
+        description: "Bibliotecas de terceiros (separadas por vírgula)"
+        required: false
+        default: ""
+      addReadme:
+        description: "Adicionar README? true/false"
+        required: false
+        default: "true"
+      addGuiAssets:
+        description: "Adicionar GUI Assets? true/false"
+        required: false
+        default: "true"
+      gradleTasks:
+        description: "Tarefas Gradle (separadas por vírgula)"
+        required: false
+        default: "clean,build"
+
+jobs:
+  generate-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: ${{ github.event.inputs.javaVersion }}
+
+      - name: Compile CLI classes
+        run: |
+          mkdir -p out
+          javac -d out src/main/java/gdx/liftoff/*.java
+
+      - name: Run Liftoff CLI
+        run: |
+          mkdir -p "${{ github.event.inputs.projectPath }}/${{ github.event.inputs.projectName }}"
+          java -cp out gdx.liftoff.MainCli \
+            --projectName="${{ github.event.inputs.projectName }}" \
+            --packageName="${{ github.event.inputs.packageName }}" \
+            --mainClassName="${{ github.event.inputs.mainClassName }}" \
+            --projectPath="${{ github.event.inputs.projectPath }}/${{ github.event.inputs.projectName }}" \
+            --androidPath="${{ github.event.inputs.androidPath }}" \
+            --libgdxVersion="${{ github.event.inputs.libgdxVersion }}" \
+            --javaVersion="${{ github.event.inputs.javaVersion }}" \
+            --appVersion="${{ github.event.inputs.appVersion }}" \
+            --gwtPluginVersion="${{ github.event.inputs.gwtPluginVersion }}" \
+            --platforms="${{ github.event.inputs.platforms }}" \
+            --extensions="${{ github.event.inputs.extensions }}" \
+            --thirdPartyLibs="${{ github.event.inputs.thirdPartyLibs }}" \
+            --addReadme="${{ github.event.inputs.addReadme }}" \
+            --addGuiAssets="${{ github.event.inputs.addGuiAssets }}" \
+            --gradleTasks="${{ github.event.inputs.gradleTasks }}"
+
+      - name: Show generated files
+        run: ls -R "${{ github.event.inputs.projectPath }}"
+
+      - name: Upload generated project artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: liftoff-generated-project
+          path: ${{ github.event.inputs.projectPath }}
