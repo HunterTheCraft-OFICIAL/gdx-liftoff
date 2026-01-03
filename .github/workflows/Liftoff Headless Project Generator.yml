@@ -1,0 +1,119 @@
+name: Liftoff Headless Project Generator
+
+on:
+  workflow_dispatch:
+    inputs:
+      # Project customization
+      project_name:
+        description: 'Enter the project name'
+        required: true
+        type: string
+      package_name:
+        description: 'Enter the base package (e.g., com.example.game)'
+        required: true
+        type: string
+
+      # Language selection (single choice)
+      language:
+        description: 'Select programming language'
+        required: true
+        type: choice
+        options:
+          - Kotlin
+          - Groovy
+          - Scala
+
+      # Platform selection (multiple choice)
+      platforms:
+        description: 'Select target platforms'
+        required: true
+        type: choice
+        options:
+          - Android
+          - Desktop
+          - iOS
+          - HTML
+          - GWT
+          - Server
+          - Shared
+          - TeaVM
+        multiple: true
+
+      # Official libraries (multiple choice)
+      official_libraries:
+        description: 'Select official libraries to include'
+        required: false
+        type: choice
+        options:
+          - AI
+          - Ashley
+          - Box2D
+          - Box2DLights
+          - Bullet
+          - Controllers
+          - Freetype
+          - Tools
+        multiple: true
+
+      # Unofficial libraries (text input, comma separated)
+      unofficial_libraries:
+        description: 'Enter unofficial libraries by ID, separated by commas'
+        required: false
+        type: string
+
+      # Templates (single choice)
+      template:
+        description: 'Select project template'
+        required: true
+        type: choice
+        options:
+          - ClassicTemplate
+          - ApplicationAdapterTemplate
+          - ApplicationListenerTemplate
+          - EmptyTemplate
+          - GameTemplate
+          - InputProcessorTemplate
+          - KotlinBasicTemplate
+          - KotlinClassicTemplate
+          - Scene2DTemplate
+          - SuperKoalioTemplate
+          - IsometricVoxelTemplate
+        multiple: false
+
+      # Additional options (boolean)
+      debug_mode:
+        description: 'Enable debug mode?'
+        required: false
+        type: boolean
+        default: false
+      headless_mode:
+        description: 'Run in Headless/CLI mode'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  generate_project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run Liftoff Headless Generator
+        run: |
+          java -cp "build/libs/liftoff.jar" gdx.liftoff.MainHeadless \
+          --project-name "${{ github.event.inputs.project_name }}" \
+          --package "${{ github.event.inputs.package_name }}" \
+          --language "${{ github.event.inputs.language }}" \
+          --platforms "${{ join(github.event.inputs.platforms, ',') }}" \
+          --official "${{ join(github.event.inputs.official_libraries, ',') }}" \
+          --unofficial "${{ github.event.inputs.unofficial_libraries }}" \
+          --template "${{ github.event.inputs.template }}" \
+          --debug "${{ github.event.inputs.debug_mode }}" \
+          --headless "${{ github.event.inputs.headless_mode }}"
