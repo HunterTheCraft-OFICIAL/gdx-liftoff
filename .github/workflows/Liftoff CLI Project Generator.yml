@@ -1,52 +1,52 @@
-name: Liftoff Project CLI
+name: Liftoff CLI Project Generator
 
 on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Escolha a branch para executar o workflow"
+        description: "Branch para executar o workflow"
         required: true
-        default: "development"
+        default: "cli-first"
       projectName:
         description: "Nome do projeto"
         required: true
-        default: "MyGame"
+        default: "MyLiftoffProject"
       packageName:
         description: "Pacote Java"
         required: true
-        default: "com.example.mygame"
+        default: "com.example.myliftoff"
       mainClassName:
         description: "Classe principal"
         required: true
         default: "MainGame"
       projectPath:
         description: "Caminho do projeto"
-        required: true
-        default: "./"
+        required: false
+        default: "./generated"
       androidPath:
         description: "Caminho do Android"
         required: false
         default: "./android"
       libgdxVersion:
         description: "Versão do LibGDX"
-        required: true
+        required: false
         default: "1.12.0"
       javaVersion:
         description: "Versão do Java"
-        required: true
+        required: false
         default: "17"
       appVersion:
         description: "Versão do App"
-        required: true
+        required: false
         default: "1.0"
       gwtPluginVersion:
         description: "Versão do plugin GWT"
-        required: true
+        required: false
         default: "2.9.0"
       platforms:
         description: "Plataformas (separadas por vírgula)"
         required: false
-        default: "desktop,android"
+        default: "core,desktop"
       extensions:
         description: "Extensões (separadas por vírgula)"
         required: false
@@ -69,8 +69,7 @@ on:
         default: "clean,build"
 
 jobs:
-  liftoff-cli:
-    name: Executar Liftoff CLI
+  generate-project:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout selected branch
@@ -81,21 +80,22 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: ${{ github.event.inputs.javaVersion }}
 
-      - name: Build project classes (se necessário)
+      - name: Compile CLI classes
         run: |
-          # Se precisar compilar classes antes de rodar o MainCli
-          javac -d ./classes ./src/gdx/liftoff/*.java
+          mkdir -p out
+          javac -d out src/main/java/gdx/liftoff/*.java
 
       - name: Run Liftoff CLI
         run: |
-          java -cp ./classes gdx.liftoff.MainCli \
+          mkdir -p "${{ github.event.inputs.projectPath }}/${{ github.event.inputs.projectName }}"
+          java -cp out gdx.liftoff.MainCli \
             --projectName="${{ github.event.inputs.projectName }}" \
             --packageName="${{ github.event.inputs.packageName }}" \
             --mainClassName="${{ github.event.inputs.mainClassName }}" \
-            --projectPath="${{ github.event.inputs.projectPath }}" \
+            --projectPath="${{ github.event.inputs.projectPath }}/${{ github.event.inputs.projectName }}" \
             --androidPath="${{ github.event.inputs.androidPath }}" \
             --libgdxVersion="${{ github.event.inputs.libgdxVersion }}" \
             --javaVersion="${{ github.event.inputs.javaVersion }}" \
@@ -108,8 +108,11 @@ jobs:
             --addGuiAssets="${{ github.event.inputs.addGuiAssets }}" \
             --gradleTasks="${{ github.event.inputs.gradleTasks }}"
 
-      - name: Upload Liftoff artifact
+      - name: Show generated files
+        run: ls -R "${{ github.event.inputs.projectPath }}"
+
+      - name: Upload generated project artifact
         uses: actions/upload-artifact@v4
         with:
-          name: liftoff-project
+          name: liftoff-generated-project
           path: ${{ github.event.inputs.projectPath }}
