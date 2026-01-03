@@ -3,30 +3,31 @@ name: Liftoff Headless Project Generator
 on:
   workflow_dispatch:
     inputs:
-      # Project customization
+      # Project customization (text input with defaults from Main.java)
       project_name:
-        description: 'Enter the project name'
-        required: true
+        description: 'Enter the project name (default from Main.java)'
+        required: false
         type: string
       package_name:
-        description: 'Enter the base package (e.g., com.example.game)'
-        required: true
+        description: 'Enter the base package (e.g., com.example.game) (default from Main.java)'
+        required: false
         type: string
 
       # Language selection (single choice)
       language:
-        description: 'Select programming language'
-        required: true
+        description: 'Select programming language (default from Main.java)'
+        required: false
         type: choice
         options:
           - Kotlin
           - Groovy
           - Scala
 
-      # Platform selection (multiple choice)
+      ########################################
+      # Platforms (multiple choice via buttons)
       platforms:
-        description: 'Select target platforms'
-        required: true
+        description: 'Select target platforms (default from Main.java)'
+        required: false
         type: choice
         options:
           - Android
@@ -39,9 +40,10 @@ on:
           - TeaVM
         multiple: true
 
-      # Official libraries (multiple choice)
+      ########################################
+      # Official Libraries (multiple choice via buttons)
       official_libraries:
-        description: 'Select official libraries to include'
+        description: 'Select official libraries to include (default from Main.java)'
         required: false
         type: choice
         options:
@@ -55,16 +57,18 @@ on:
           - Tools
         multiple: true
 
-      # Unofficial libraries (text input, comma separated)
+      ########################################
+      # Unofficial Libraries (text input, comma-separated)
       unofficial_libraries:
-        description: 'Enter unofficial libraries by ID, separated by commas'
+        description: 'Enter unofficial libraries by ID, separated by commas (default empty)'
         required: false
         type: string
 
+      ########################################
       # Templates (single choice)
       template:
-        description: 'Select project template'
-        required: true
+        description: 'Select project template (default from Main.java)'
+        required: false
         type: choice
         options:
           - ClassicTemplate
@@ -78,17 +82,17 @@ on:
           - Scene2DTemplate
           - SuperKoalioTemplate
           - IsometricVoxelTemplate
-        multiple: false
 
+      ########################################
       # Additional options (boolean)
       debug_mode:
-        description: 'Enable debug mode?'
+        description: 'Enable debug mode? (default: false)'
         required: false
         type: boolean
         default: false
       headless_mode:
-        description: 'Run in Headless/CLI mode'
-        required: true
+        description: 'Run in Headless/CLI mode (default: true)'
+        required: false
         type: boolean
         default: true
 
@@ -108,12 +112,12 @@ jobs:
       - name: Run Liftoff Headless Generator
         run: |
           java -cp "build/libs/liftoff.jar" gdx.liftoff.MainHeadless \
-          --project-name "${{ github.event.inputs.project_name }}" \
-          --package "${{ github.event.inputs.package_name }}" \
-          --language "${{ github.event.inputs.language }}" \
-          --platforms "${{ join(github.event.inputs.platforms, ',') }}" \
-          --official "${{ join(github.event.inputs.official_libraries, ',') }}" \
-          --unofficial "${{ github.event.inputs.unofficial_libraries }}" \
-          --template "${{ github.event.inputs.template }}" \
+          --project-name "${{ github.event.inputs.project_name || 'DEFAULT_PROJECT_NAME' }}" \
+          --package "${{ github.event.inputs.package_name || 'com.example.game' }}" \
+          --language "${{ github.event.inputs.language || 'Kotlin' }}" \
+          --platforms "${{ github.event.inputs.platforms && join(github.event.inputs.platforms, ',') || 'Desktop,Android' }}" \
+          --official "${{ github.event.inputs.official_libraries && join(github.event.inputs.official_libraries, ',') || 'AI,Ashley' }}" \
+          --unofficial "${{ github.event.inputs.unofficial_libraries || '' }}" \
+          --template "${{ github.event.inputs.template || 'ClassicTemplate' }}" \
           --debug "${{ github.event.inputs.debug_mode }}" \
           --headless "${{ github.event.inputs.headless_mode }}"
