@@ -3,48 +3,41 @@ name: Liftoff Headless Project Generator
 on:
   workflow_dispatch:
     inputs:
-      # Project customization (text input with defaults from Main.java)
-      project_name:
-        description: 'Enter the project name (default from Main.java)'
-        required: false
-        type: string
-      package_name:
-        description: 'Enter the base package (e.g., com.example.game) (default from Main.java)'
-        required: false
-        type: string
-
-      # Language selection (single choice)
+      projectName:
+        description: "Enter the project name"
+        required: true
+        default: "MyGame"
+      packageName:
+        description: "Enter the project package name"
+        required: true
+        default: "com.mygame"
+      platforms:
+        description: "Select target platforms (multiple allowed)"
+        required: true
+        default: "Android,Desktop"
+        type: choice
+        options:
+          - Android
+          - Desktop
+          - GWT
+          - iOS
+          - iOSMOE
+          - Headless
+          - Shared
+          - TeaVM
       language:
-        description: 'Select programming language (default from Main.java)'
-        required: false
+        description: "Select programming language (single choice)"
+        required: true
+        default: "Kotlin"
         type: choice
         options:
           - Kotlin
           - Groovy
           - Scala
-
-      ########################################
-      # Platforms (multiple choice via buttons)
-      platforms:
-        description: 'Select target platforms (default from Main.java)'
+      officialLibs:
+        description: "Select official libraries to include (multiple allowed)"
         required: false
-        type: choice
-        options:
-          - Android
-          - Desktop
-          - iOS
-          - HTML
-          - GWT
-          - Server
-          - Shared
-          - TeaVM
-        multiple: true
-
-      ########################################
-      # Official Libraries (multiple choice via buttons)
-      official_libraries:
-        description: 'Select official libraries to include (default from Main.java)'
-        required: false
+        default: "AI,Ashley,Box2D,Box2DLights,Bullet,Controllers,Freetype,Tools"
         type: choice
         options:
           - AI
@@ -55,69 +48,51 @@ on:
           - Controllers
           - Freetype
           - Tools
-        multiple: true
-
-      ########################################
-      # Unofficial Libraries (text input, comma-separated)
-      unofficial_libraries:
-        description: 'Enter unofficial libraries by ID, separated by commas (default empty)'
+      unofficialLibs:
+        description: "Enter unofficial libraries (IDs separated by comma)"
         required: false
-        type: string
-
-      ########################################
-      # Templates (single choice)
-      template:
-        description: 'Select project template (default from Main.java)'
-        required: false
-        type: choice
-        options:
-          - ClassicTemplate
-          - ApplicationAdapterTemplate
-          - ApplicationListenerTemplate
-          - EmptyTemplate
-          - GameTemplate
-          - InputProcessorTemplate
-          - KotlinBasicTemplate
-          - KotlinClassicTemplate
-          - Scene2DTemplate
-          - SuperKoalioTemplate
-          - IsometricVoxelTemplate
-
-      ########################################
-      # Additional options (boolean)
-      debug_mode:
-        description: 'Enable debug mode? (default: false)'
-        required: false
+        default: ""
+      headless:
+        description: "Enable Headless (CLI) mode – mandatory"
+        required: true
+        default: "true"
         type: boolean
-        default: false
-      headless_mode:
-        description: 'Run in Headless/CLI mode (default: true)'
+      debug:
+        description: "Enable debug mode"
         required: false
+        default: "false"
         type: boolean
-        default: true
 
 jobs:
   generate_project:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
-      - name: Run Liftoff Headless Generator
+      - name: Build Liftoff JAR
+        run: ./gradlew clean shadowJar
+
+      - name: Run Headless CLI
         run: |
-          java -cp "build/libs/liftoff.jar" gdx.liftoff.MainHeadless \
-          --project-name "${{ github.event.inputs.project_name || 'DEFAULT_PROJECT_NAME' }}" \
-          --package "${{ github.event.inputs.package_name || 'com.example.game' }}" \
-          --language "${{ github.event.inputs.language || 'Kotlin' }}" \
-          --platforms "${{ github.event.inputs.platforms && join(github.event.inputs.platforms, ',') || 'Desktop,Android' }}" \
-          --official "${{ github.event.inputs.official_libraries && join(github.event.inputs.official_libraries, ',') || 'AI,Ashley' }}" \
-          --unofficial "${{ github.event.inputs.unofficial_libraries || '' }}" \
-          --template "${{ github.event.inputs.template || 'ClassicTemplate' }}" \
-          --debug "${{ github.event.inputs.debug_mode }}" \
-          --headless "${{ github.event.inputs.headless_mode }}"
+          java -cp build/libs/liftoff.jar gdx.liftoff.MainHeadless \
+            --projectName="${{ github.event.inputs.projectName }}" \
+            --packageName="${{ github.event.inputs.packageName }}" \
+            --platforms="${{ github.event.inputs.platforms }}" \
+            --language="${{ github.event.inputs.language }}" \
+            --officialLibs="${{ github.event.inputs.officialLibs }}" \
+            --unofficialLibs="${{ github.event.inputs.unofficialLibs }}" \
+            --headless="${{ github.event.inputs.headless }}" \
+            --debug="${{ github.event.inputs.debug }}"
+
+      - name: Upload Liftoff JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: liftoff-jar
+          path: build/libs/liftoff.jar
