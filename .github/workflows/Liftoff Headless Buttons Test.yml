@@ -1,0 +1,159 @@
+name: Liftoff Headless Buttons Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      # --------------------------
+      # Project info
+      # --------------------------
+      project_name:
+        description: 'Enter the project name'
+        required: true
+        default: 'MyGame'
+        type: string
+      package_name:
+        description: 'Enter the main package name'
+        required: true
+        default: 'com.mygame'
+        type: string
+
+      # --------------------------
+      # Platform selection (multiple choice)
+      # --------------------------
+      platform_android:
+        description: 'Include Android?'
+        required: false
+        default: 'true'
+        type: boolean
+      platform_desktop:
+        description: 'Include Desktop?'
+        required: false
+        default: 'true'
+        type: boolean
+      platform_html:
+        description: 'Include HTML?'
+        required: false
+        default: 'false'
+        type: boolean
+      platform_ios:
+        description: 'Include iOS?'
+        required: false
+        default: 'false'
+        type: boolean
+
+      # --------------------------
+      # Language selection (single choice)
+      # --------------------------
+      language:
+        description: 'Select the programming language'
+        required: true
+        default: 'Kotlin'
+        type: choice
+        options:
+          - Kotlin
+          - Groovy
+          - Scala
+
+      # --------------------------
+      # Official libraries (multiple choice)
+      # --------------------------
+      lib_ai:
+        description: 'Include AI?'
+        required: false
+        default: 'false'
+        type: boolean
+      lib_ashley:
+        description: 'Include Ashley?'
+        required: false
+        default: 'true'
+        type: boolean
+      lib_box2d:
+        description: 'Include Box2D?'
+        required: false
+        default: 'true'
+        type: boolean
+      lib_box2dlights:
+        description: 'Include Box2DLights?'
+        required: false
+        default: 'false'
+        type: boolean
+      lib_bullet:
+        description: 'Include Bullet?'
+        required: false
+        default: 'false'
+        type: boolean
+      lib_controllers:
+        description: 'Include Controllers?'
+        required: false
+        default: 'false'
+        type: boolean
+      lib_freetype:
+        description: 'Include FreeType?'
+        required: false
+        default: 'false'
+        type: boolean
+      lib_tools:
+        description: 'Include Tools?'
+        required: false
+        default: 'false'
+        type: boolean
+
+      # --------------------------
+      # Non-official libraries (text input)
+      # --------------------------
+      unofficial_libs:
+        description: 'Enter non-official libraries (comma-separated IDs)'
+        required: false
+        default: ''
+        type: string
+
+      # --------------------------
+      # Project mode
+      # --------------------------
+      project_mode:
+        description: 'Select project mode'
+        required: true
+        default: 'Standard'
+        type: choice
+        options:
+          - Standard
+          - Headless
+          - Debug
+
+jobs:
+  test_buttons:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Display Inputs
+        run: |
+          echo "=== Project Info ==="
+          echo "Project Name: ${{ github.event.inputs.project_name }}"
+          echo "Package Name: ${{ github.event.inputs.package_name }}"
+
+          echo "=== Platforms ==="
+          echo "Android: ${{ github.event.inputs.platform_android }}"
+          echo "Desktop: ${{ github.event.inputs.platform_desktop }}"
+          echo "HTML: ${{ github.event.inputs.platform_html }}"
+          echo "iOS: ${{ github.event.inputs.platform_ios }}"
+
+          echo "=== Language ==="
+          echo "Language: ${{ github.event.inputs.language }}"
+
+          echo "=== Official Libraries ==="
+          echo "AI: ${{ github.event.inputs.lib_ai }}"
+          echo "Ashley: ${{ github.event.inputs.lib_ashley }}"
+          echo "Box2D: ${{ github.event.inputs.lib_box2d }}"
+          echo "Box2DLights: ${{ github.event.inputs.lib_box2dlights }}"
+          echo "Bullet: ${{ github.event.inputs.lib_bullet }}"
+          echo "Controllers: ${{ github.event.inputs.lib_controllers }}"
+          echo "FreeType: ${{ github.event.inputs.lib_freetype }}"
+          echo "Tools: ${{ github.event.inputs.lib_tools }}"
+
+          echo "=== Non-official Libraries ==="
+          echo "Unofficial: ${{ github.event.inputs.unofficial_libs }}"
+
+          echo "=== Project Mode ==="
+          echo "Mode: ${{ github.event.inputs.project_mode }}"
