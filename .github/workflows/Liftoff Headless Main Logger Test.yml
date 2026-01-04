@@ -1,0 +1,66 @@
+name: Liftoff Headless Main Logger Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_name:
+        description: 'Enter the project name'
+        required: true
+        default: 'MyGame'
+      package_name:
+        description: 'Enter the main package name'
+        required: true
+        default: 'com.mygame'
+
+jobs:
+  run_main_logger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build project
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build -x test
+
+      - name: Run MainLoggerLauncher
+        run: |
+          echo "Executing MainLoggerLauncher..."
+          java -cp build/libs/* gdx.liftoff.MainLoggerLauncher \
+            --projectName=${{ github.event.inputs.project_name }} \
+            --packageName=${{ github.event.inputs.package_name }}
+
+      - name: Print main_execution.log
+        if: always()
+        run: |
+          echo "=== main_execution.log ==="
+          cat main_execution.log || echo "File not found"
+
+      - name: Print main_stdout.log
+        if: always()
+        run: |
+          echo "=== main_stdout.log ==="
+          cat main_stdout.log || echo "File not found"
+
+      - name: Print main_stderr.log
+        if: always()
+        run: |
+          echo "=== main_stderr.log ==="
+          cat main_stderr.log || echo "File not found"
+
+      - name: Upload logs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-logs
+          path: |
+            main_execution.log
+            main_stdout.log
+            main_stderr.log
