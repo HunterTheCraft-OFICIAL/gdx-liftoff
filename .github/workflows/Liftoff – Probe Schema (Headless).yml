@@ -30,7 +30,7 @@ jobs:
       - name: Run Liftoff CLI – dump schema
         run: |
           mkdir -p out
-          java -cp build/classes/java/main:build/classes/kotlin/main gdx.liftoff.LiftoffCli dump schema > out/liftoff-schema.json
+          java -cp build/classes/java/main:build/classes/kotlin/main gdx.liftoff.LiftoffCli dump schema
 
       - name: Upload schema artifact
         uses: actions/upload-artifact@v4
