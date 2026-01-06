@@ -1,39 +1,162 @@
 package gdx.liftoff
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.backends.headless.HeadlessApplication
-import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration
-import gdx.liftoff.Listing
-import org.json.JSONObject
+import gdx.liftoff.data.platforms.Platform
+import gdx.liftoff.data.languages.Language
+import gdx.liftoff.data.libraries.Library
+import gdx.liftoff.data.templates.Template
 
 object LiftoffCli {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        HeadlessApplication(object : com.badlogic.gdx.ApplicationAdapter() {}, HeadlessApplicationConfiguration())
-
-        if (args.isEmpty() || args[0] != "dump") {
-            error("Usage: LiftoffCli dump schema")
+        if (args.isEmpty()) {
+            printHelp()
+            return
         }
 
-        if (args.size >= 2 && args[1] == "schema") {
-            dumpSchema()
+        when (args[0]) {
+            "list" -> handleList(args.drop(1))
+            "dump" -> handleDump(args.drop(1))
+            else -> printHelp()
         }
     }
 
+    private fun handleList(args: List<String>) {
+        if (args.isEmpty()) {
+            printHelp()
+            return
+        }
+
+        when (args[0]) {
+            "platforms" -> listPlatforms()
+            "languages" -> listLanguages()
+            "templates" -> listTemplates()
+            "libraries" -> {
+                if (args.size < 2) {
+                    println("Specify 'official' or 'unofficial'")
+                    return
+                }
+                when (args[1]) {
+                    "official" -> listOfficialLibraries()
+                    "unofficial" -> listUnofficialLibraries()
+                    else -> println("Unknown library group: ${args[1]}")
+                }
+            }
+            else -> printHelp()
+        }
+    }
+
+    private fun handleDump(args: List<String>) {
+        if (args.isEmpty()) {
+            printHelp()
+            return
+        }
+
+        when (args[0]) {
+            "schema" -> dumpSchema()
+            else -> printHelp()
+        }
+    }
+
+    // -------------------------
+    // LIST COMMANDS
+    // -------------------------
+
+    private fun listPlatforms() {
+        println("PLATFORMS:")
+        Listing.platforms.forEach { p: Platform ->
+            println("- ${p.id}")
+        }
+    }
+
+    private fun listLanguages() {
+        println("LANGUAGES:")
+        Listing.languages.forEach { l: Language ->
+            println("- ${l.id} (version=${l.version})")
+        }
+        println("- java (default)")
+    }
+
+    private fun listTemplates() {
+        println("TEMPLATES:")
+        Listing.templates.forEach { t: Template ->
+            println("- ${t.id}")
+        }
+    }
+
+    private fun listOfficialLibraries() {
+        println("OFFICIAL LIBRARIES:")
+        Listing.officialLibraries.forEach { l: Library ->
+            println("- ${l.id}")
+        }
+    }
+
+    private fun listUnofficialLibraries() {
+        println("UNOFFICIAL LIBRARIES:")
+        Listing.unofficialLibraries.forEach { l: Library ->
+            println("- ${l.id}")
+        }
+    }
+
+    // -------------------------
+    // DUMP COMMAND
+    // -------------------------
+
     private fun dumpSchema() {
-        val root = JSONObject()
+        println("{")
 
-        root.put("platforms", Listing.platforms.map { it.id })
-        root.put("languages", Listing.languages.map { it.id })
-        root.put("templates", Listing.templates.map { it.id })
+        println("  \"platforms\": [")
+        Listing.platforms.joinToString(",\n") { "    \"${it.id}\"" }
+            .also { println(it) }
+        println("  ],")
 
-        val libraries = JSONObject()
-        libraries.put("official", Listing.officialLibraries.map { it.id })
-        libraries.put("unofficial", Listing.unofficialNames.toList())
+        println("  \"languages\": [")
+        (Listing.languages.map { it.id } + "java")
+            .joinToString(",\n") { "    \"$it\"" }
+            .also { println(it) }
+        println("  ],")
 
-        root.put("libraries", libraries)
+        println("  \"templates\": [")
+        Listing.templates.joinToString(",\n") { "    \"${it.id}\"" }
+            .also { println(it) }
+        println("  ],")
 
-        println(root.toString(2))
+        println("  \"libraries\": {")
+        println("    \"official\": [")
+        Listing.officialLibraries.joinToString(",\n") { "      \"${it.id}\"" }
+            .also { println(it) }
+        println("    ],")
+
+        println("    \"unofficial\": [")
+        Listing.unofficialLibraries.joinToString(",\n") { "      \"${it.id}\"" }
+            .also { println(it) }
+        println("    ]")
+        println("  }")
+
+        println("}")
+    }
+
+    // -------------------------
+    // HELP
+    // -------------------------
+
+    private fun printHelp() {
+        println(
+            """
+            Liftoff CLI – Headless Probe Mode
+
+            Commands:
+              list platforms
+              list languages
+              list templates
+              list libraries official
+              list libraries unofficial
+              dump schema
+
+            Examples:
+              java -jar liftoff-cli.jar list platforms
+              java -jar liftoff-cli.jar dump schema
+            """.trimIndent()
+        )
     }
 }
