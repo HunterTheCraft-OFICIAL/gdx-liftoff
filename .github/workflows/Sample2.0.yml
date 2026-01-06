@@ -1,0 +1,49 @@
+name: Liftoff Headless Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-projects:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Grant Gradle Wrapper execute permission
+        run: chmod +x ./gradlew
+
+      - name: Clean and Build (skip tests)
+        run: ./gradlew clean build -x test
+
+      - name: Run Sample2.0 Headless Project Generation
+        run: |
+          ./gradlew run -PmainClass=gdx.liftoff.Sample2Kt
+
+      - name: List generated projects
+        run: |
+          echo "Java Project:"
+          ls -R build/dist/java-project
+          echo ""
+          echo "Kotlin Project:"
+          ls -R build/dist/kotlin-project
