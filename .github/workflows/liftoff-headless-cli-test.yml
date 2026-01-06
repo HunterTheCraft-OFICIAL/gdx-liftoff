@@ -1,0 +1,56 @@
+name: Liftoff Headless CLI – Build, Run and Artifact
+
+on:
+  workflow_dispatch:
+    inputs:
+      preset:
+        description: "Preset do Liftoff (DEFAULT, KOTLIN, KTX, etc)"
+        required: false
+        default: "DEFAULT"
+
+jobs:
+  liftoff-headless:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Garantir permissão do Gradle Wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build do Liftoff
+        run: |
+          echo "=== BUILD LIFTOFF ==="
+          ./gradlew clean build --no-daemon
+
+      - name: Executar Liftoff em modo Headless (CLI)
+        run: |
+          echo "=== EXECUTANDO LIFTOFF CLI ==="
+          echo "Preset: ${{ inputs.preset }}"
+          ./gradlew run --no-daemon --args="${{ inputs.preset }}"
+
+      - name: Listar arquivos gerados
+        run: |
+          echo "=== ARVORE build/dist ==="
+          if [ -d build/dist ]; then
+            ls -R build/dist
+          else
+            echo "Diretório build/dist não encontrado"
+          fi
+
+      - name: Publicar artefato do projeto gerado
+        uses: actions/upload-artifact@v4
+        with:
+          name: liftoff-generated-project
+          path: build/dist
+          if-no-files-found: warn
