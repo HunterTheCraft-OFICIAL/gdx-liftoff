@@ -105,7 +105,7 @@ object LiftoffCli {
     println("{")
 
     println("  \"platforms\": [")
-    val platforms = Listing.platforms
+    val platforms: List<Platform> = Listing.platforms
     for (i in platforms.indices) {
       val suffix = if (i < platforms.size - 1) "," else ""
       println("    \"${platforms[i].id}\"$suffix")
@@ -113,7 +113,7 @@ object LiftoffCli {
     println("  ],")
 
     println("  \"languages\": [")
-    val languages = Listing.languages.map { it.id } + "java"
+    val languages: List<String> = Listing.languages.map { it.id } + "java"
     for (i in languages.indices) {
       val suffix = if (i < languages.size - 1) "," else ""
       println("    \"${languages[i]}\"$suffix")
@@ -121,7 +121,7 @@ object LiftoffCli {
     println("  ],")
 
     println("  \"templates\": [")
-    val templates = Listing.templates
+    val templates: List<Template> = Listing.templates
     for (i in templates.indices) {
       val suffix = if (i < templates.size - 1) "," else ""
       println("    \"${templates[i].id}\"$suffix")
@@ -130,7 +130,7 @@ object LiftoffCli {
 
     println("  \"libraries\": {")
     println("    \"official\": [")
-    val official = Listing.officialLibraries
+    val official: List<Library> = Listing.officialLibraries
     for (i in official.indices) {
       val suffix = if (i < official.size - 1) "," else ""
       println("      \"${official[i].id}\"$suffix")
@@ -138,7 +138,7 @@ object LiftoffCli {
     println("    ],")
 
     println("    \"unofficial\": [")
-    val unofficial = Listing.unofficialLibraries
+    val unofficial: List<Library> = Listing.unofficialLibraries.toList()
     for (i in unofficial.indices) {
       val suffix = if (i < unofficial.size - 1) "," else ""
       println("      \"${unofficial[i].id}\"$suffix")
