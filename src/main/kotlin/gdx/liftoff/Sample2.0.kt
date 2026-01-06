@@ -26,6 +26,7 @@ import kotlin.system.exitProcess
 
 /** Presets com todas as plataformas e extensões oficiais. */
 enum class Preset {
+
   JAVA_FULL {
     override val projectName: String
       get() = "gdx-full-demo-java"
@@ -36,7 +37,13 @@ enum class Preset {
     override val languages: List<Language>
       get() = listOf(Java())
     override val officialExtensions: Optional<List<Library>>
-      get() = Optional.of(listOf(Box2D(), Box2DLights(), Freetype()))
+      get() = Optional.of(
+        listOf(
+          Box2D(),
+          Box2DLights(),
+          Freetype()
+        )
+      )
     override val thirdPartyExtensions: List<Library>
       get() = emptyList()
     override val template: Template
@@ -53,7 +60,13 @@ enum class Preset {
     override val languages: List<Language>
       get() = listOf(Kotlin())
     override val officialExtensions: Optional<List<Library>>
-      get() = Optional.of(listOf(Box2D(), Box2DLights(), Freetype()))
+      get() = Optional.of(
+        listOf(
+          Box2D(),
+          Box2DLights(),
+          Freetype()
+        )
+      )
     override val thirdPartyExtensions: List<Library>
       get() = emptyList()
     override val template: Template
@@ -70,7 +83,10 @@ enum class Preset {
   open val addSkin: Boolean = true
 
   val languagesData: LanguagesData
-    get() = LanguagesData(languages.toMutableList(), languages.associate { it.id to it.version })
+    get() = LanguagesData(
+      languages.toMutableList(),
+      languages.associate { it.id to it.version }
+    )
 }
 
 fun getPreset(arguments: Array<String>): Preset =
@@ -131,7 +147,11 @@ fun main(arguments: Array<String>) {
   )
 
   project.generate()
-  project.includeGradleWrapper(NullLogger, executeGradleTasks = false)
+  project.includeGradleWrapper(
+    NullLogger,
+    executeGradleTasks = false
+  )
+
   exitProcess(0)
 }
 
