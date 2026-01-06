@@ -1,4 +1,4 @@
-@file:JvmName("Sample2")
+@file:JvmName("Sample2_1")
 
 package gdx.liftoff
 
@@ -12,94 +12,141 @@ import gdx.liftoff.data.languages.Java
 import gdx.liftoff.data.languages.Kotlin
 import gdx.liftoff.data.languages.Language
 import gdx.liftoff.data.libraries.Library
-import gdx.liftoff.data.libraries.official.*
-import gdx.liftoff.data.platforms.*
-import gdx.liftoff.data.project.*
+import gdx.liftoff.data.libraries.official.Box2D
+import gdx.liftoff.data.libraries.official.Box2DLights
+import gdx.liftoff.data.libraries.official.Freetype
+import gdx.liftoff.data.platforms.Android
+import gdx.liftoff.data.platforms.Core
+import gdx.liftoff.data.platforms.GWT
+import gdx.liftoff.data.platforms.IOS
+import gdx.liftoff.data.platforms.Lwjgl3
+import gdx.liftoff.data.platforms.TeaVM
+import gdx.liftoff.data.platforms.Platform
+import gdx.liftoff.data.project.AdvancedProjectData
+import gdx.liftoff.data.project.BasicProjectData
+import gdx.liftoff.data.project.ExtensionsData
+import gdx.liftoff.data.project.LanguagesData
+import gdx.liftoff.data.project.Project
+import gdx.liftoff.data.project.ProjectLogger
 import gdx.liftoff.data.templates.official.ClassicTemplate
 import gdx.liftoff.data.templates.official.KotlinClassicTemplate
-import kotlin.system.exitProcess
+import gdx.liftoff.data.templates.Template
 import java.io.File
+import java.util.Optional
+import kotlin.system.exitProcess
 
-/** Lista de plataformas oficiais */
-val officialPlatforms = listOf(Core(), Lwjgl3(), Android(), IOS(), GWT(), TeaVM())
+/** Determines which platforms, extensions, templates, etc. are used by the project generator. */
+enum class Preset {
+    /** All official platforms and extensions, Java version. */
+    JAVA {
+        override val projectName: String
+            get() = "gdx-liftoff-java-demo"
+        override val rootPackage: String
+            get() = "gdx.liftoff.java"
+        override val platforms: List<Platform>
+            get() = listOf(Core(), Lwjgl3(), Android(), IOS(), GWT(), TeaVM())
+        override val languages: List<Language>
+            get() = listOf(Java())
+        override val officialExtensions: Optional<List<Library>>
+            get() = Optional.of(listOf(Box2D(), Box2DLights(), Freetype()))
+        override val thirdPartyExtensions: List<Library> = emptyList()
+        override val template: Template
+            get() = ClassicTemplate()
+    },
 
-/** Lista de extensões oficiais */
-val officialExtensions = listOf(Box2D(), Box2DLights(), Freetype())
+    /** All official platforms and extensions, Kotlin version. */
+    KOTLIN {
+        override val projectName: String
+            get() = "gdx-liftoff-kotlin-demo"
+        override val rootPackage: String
+            get() = "gdx.liftoff.kotlin"
+        override val platforms: List<Platform>
+            get() = listOf(Core(), Lwjgl3(), Android(), IOS(), GWT(), TeaVM())
+        override val languages: List<Language>
+            get() = listOf(Kotlin())
+        override val officialExtensions: Optional<List<Library>>
+            get() = Optional.of(listOf(Box2D(), Box2DLights(), Freetype()))
+        override val thirdPartyExtensions: List<Library> = emptyList()
+        override val template: Template
+            get() = KotlinClassicTemplate()
+    };
 
-fun generateProject(
-    projectName: String,
-    rootPackage: String,
-    languages: List<Language>,
-    template: ProjectTemplate,
-    destinationFolder: File
-) {
+    abstract val projectName: String
+    abstract val rootPackage: String
+    abstract val platforms: List<Platform>
+    abstract val languages: List<Language>
+    abstract val officialExtensions: Optional<List<Library>>
+    abstract val thirdPartyExtensions: List<Library>
+    abstract val template: Template
+    open val addSkin: Boolean = true
+
+    val languagesData: LanguagesData
+        get() = LanguagesData(languages.toMutableList(), languages.associate { it.id to it.version })
+}
+
+fun getPreset(arguments: Array<String>): Preset =
+    when {
+        arguments.isEmpty() -> Preset.JAVA
+        else -> {
+            val name = arguments.first()
+            try {
+                Preset.valueOf(name.uppercase())
+            } catch (_: IllegalArgumentException) {
+                Preset.JAVA
+            }
+        }
+    }
+
+fun main(arguments: Array<String>) {
+    GdxNativesLoader.load()
+    Gdx.files = Lwjgl3Files()
+
+    val preset = getPreset(arguments)
+    val officialExtensions = preset.officialExtensions.orElse(emptyList())
     val basicData = BasicProjectData(
-        name = projectName,
-        rootPackage = rootPackage,
+        name = preset.projectName,
+        rootPackage = preset.rootPackage,
         mainClass = "Main",
-        destination = FileHandle(destinationFolder),
-        androidSdk = FileHandle(File("."))
+        destination = FileHandle(File("build/dist/${preset.projectName}")),
+        androidSdk = FileHandle(File(".")),
     )
 
-    val javaVersion = Java().version
-    val gwtVersion = "2.2.7"
+    val defaultJavaVersion = Java().version
+    val defaultGwtVersion = "2.2.7"
 
     val advancedData = AdvancedProjectData(
         version = Configuration.VERSION,
         gdxVersion = Version.VERSION,
-        javaVersion = javaVersion,
-        gwtPluginVersion = gwtVersion,
-        serverJavaVersion = javaVersion,
-        desktopJavaVersion = javaVersion,
-        generateSkin = true,
+        javaVersion = defaultJavaVersion,
+        gwtPluginVersion = defaultGwtVersion,
+        serverJavaVersion = defaultJavaVersion,
+        desktopJavaVersion = defaultJavaVersion,
+        generateSkin = preset.addSkin,
         generateReadme = true,
-        gradleTasks = arrayListOf()
+        gradleTasks = arrayListOf(),
+    )
+
+    val extensions = ExtensionsData(
+        officialExtensions = officialExtensions,
+        thirdPartyExtensions = preset.thirdPartyExtensions,
     )
 
     val project = Project(
         basic = basicData,
         advanced = advancedData,
-        platforms = officialPlatforms.associateBy { it.id },
-        languages = LanguagesData(languages.toMutableList(), languages.associate { it.id to it.version }),
-        extensions = ExtensionsData(officialExtensions, emptyList()),
-        template = template
+        platforms = preset.platforms.associateBy { it.id },
+        languages = preset.languagesData,
+        extensions = extensions,
+        template = preset.template,
     )
 
     project.generate()
     project.includeGradleWrapper(NullLogger, executeGradleTasks = false)
-}
-
-/** Headless CLI entrypoint */
-fun main(args: Array<String>) {
-    GdxNativesLoader.load()
-    Gdx.files = Lwjgl3Files()
-
-    // Projeto Java
-    generateProject(
-        projectName = "gdx-full-java",
-        rootPackage = "gdx.full.java",
-        languages = listOf(Java()),
-        template = ClassicTemplate(),
-        destinationFolder = File("build/dist/java-project")
-    )
-
-    // Projeto Kotlin
-    generateProject(
-        projectName = "gdx-full-kotlin",
-        rootPackage = "gdx.full.kotlin",
-        languages = listOf(Kotlin()),
-        template = KotlinClassicTemplate(),
-        destinationFolder = File("build/dist/kotlin-project")
-    )
-
     exitProcess(0)
 }
 
-/** No-op logger */
+/** No-op logger for interfacing with the project generator. */
 object NullLogger : ProjectLogger {
     override fun log(message: String) {}
     override fun logNls(bundleLine: String) {}
 }
-
-/** Para compatibilidade de tipos de template */
-typealias ProjectTemplate = Template
