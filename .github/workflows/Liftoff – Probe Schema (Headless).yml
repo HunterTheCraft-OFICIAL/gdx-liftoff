@@ -24,13 +24,25 @@ jobs:
       - name: Grant execute permission to Gradle
         run: chmod +x gradlew
 
-      - name: Build Liftoff (no UI)
+      - name: Build Liftoff (headless)
         run: ./gradlew clean build -x test
 
-      - name: Run Liftoff CLI – dump schema
+      # Executa o CLI diretamente do distribution gerado pelo Gradle
+      - name: Run Liftoff CLI – probe schema
         run: |
           mkdir -p out
-          java -cp build/classes/java/main:build/classes/kotlin/main gdx.liftoff.LiftoffCli dump schema
+          ./build/install/gdx-liftoff/bin/gdx-liftoff \
+            dump schema \
+            --output out/liftoff-schema.json
+
+      # Falha explícita se o artefato NÃO existir
+      - name: Verify probe artifact
+        run: |
+          if [ ! -f out/liftoff-schema.json ]; then
+            echo "❌ liftoff-schema.json was not generated"
+            exit 1
+          fi
+          echo "✅ liftoff-schema.json generated successfully"
 
       - name: Upload schema artifact
         uses: actions/upload-artifact@v4
