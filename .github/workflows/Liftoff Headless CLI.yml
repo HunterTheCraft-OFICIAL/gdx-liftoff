@@ -1,0 +1,65 @@
+name: Liftoff Headless CLI
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # 1️⃣ Checa o código
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Configura Java 17 (compatível com Gradle 9.x)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # 3️⃣ Permissão para o gradlew
+      - name: Make Gradlew Executable
+        run: chmod +x ./gradlew
+
+      # 4️⃣ Build do projeto, sem rodar testes
+      - name: Build Project
+        run: ./gradlew clean build -x test
+
+      # 5️⃣ Executa LiftoffCli para gerar projeto headless
+      - name: Run Liftoff CLI (Default preset)
+        run: |
+          java -cp build/libs/*:build/classes/kotlin/main gdx.liftoff.LiftoffCli DEFAULT
+
+      # 6️⃣ Optional: Exportar presets em JSON
+      - name: Export Presets JSON
+        run: |
+          mkdir -p build/schema
+          cat <<EOF > build/schema/presets.json
+          {
+            "presets": ${'$'}(kotlin -cp build/classes/kotlin/main -e "println(gdx.liftoff.LiftoffConfig.DEFAULT_PRESETS)")
+          }
+          EOF
+
+      # 7️⃣ Upload do projeto gerado e schema
+      - name: Upload generated project
+        uses: actions/upload-artifact@v4
+        with:
+          name: liftoff-generated
+          path: build/dist
+
+      - name: Upload schema
+        uses: actions/upload-artifact@v4
+        with:
+          name: liftoff-schema
+          path: build/schema
