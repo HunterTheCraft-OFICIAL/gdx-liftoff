@@ -1,23 +1,20 @@
 package gdx.liftoff
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
-import gdx.liftoff.templates.ClassicTemplate
-import gdx.liftoff.templates.KotlinClassicTemplate
-import gdx.liftoff.templates.KtxTemplate
 import java.io.File
 
-object NullLogger : ProjectLogger {
-    override fun log(message: String) {}
-}
+// Importa do Sample.kt
+import gdx.liftoff.Sample.NullLogger
+import gdx.liftoff.Sample.ClassicTemplate
+import gdx.liftoff.Sample.KotlinClassicTemplate
+import gdx.liftoff.Sample.KtxTemplate
 
 class LiftoffCli {
 
     fun createProject(config: LiftoffConfig, outputDir: File) {
-        // Converte File para FileHandle
-        val handle: FileHandle = Gdx.files.absolute(outputDir.absolutePath)
+        val outputHandle: FileHandle = com.badlogic.gdx.Gdx.files.absolute(outputDir.absolutePath)
 
-        // Seleção do template
+        // Seleciona o template do Sample.kt
         val template = when (config.template) {
             "classic" -> ClassicTemplate
             "kotlin-classic" -> KotlinClassicTemplate
@@ -25,23 +22,18 @@ class LiftoffCli {
             else -> ClassicTemplate
         }
 
-        // Inicialização do projeto com dados do config
         val project = SampleProject(
             name = config.projectName,
             packageName = config.packageName,
             platforms = config.platforms.toMutableList(),
             languages = config.languages.toMutableList(),
             template = template,
-            output = handle,
+            output = outputHandle,
             logger = NullLogger
         )
 
         project.generate()
     }
-}
-
-interface ProjectLogger {
-    fun log(message: String)
 }
 
 class SampleProject(
@@ -55,6 +47,10 @@ class SampleProject(
 ) {
     fun generate() {
         logger.log("Generating project $name at ${output.path()}")
-        // Lógica de criação do projeto (copiar arquivos, gerar gradle, etc)
+        // lógica de criação do projeto
     }
+}
+
+interface ProjectLogger {
+    fun log(message: String)
 }
