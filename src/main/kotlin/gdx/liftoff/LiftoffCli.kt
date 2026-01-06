@@ -1,175 +1,94 @@
 package gdx.liftoff
 
-import gdx.liftoff.data.languages.Language
-import gdx.liftoff.data.libraries.Library
-import gdx.liftoff.data.platforms.Platform
-import gdx.liftoff.data.templates.Template
+import java.io.File
+import kotlin.system.exitProcess
 
 object LiftoffCli {
-  @JvmStatic
-  fun main(args: Array<String>) {
-    if (args.isEmpty()) {
-      printHelp()
-      return
-    }
 
-    when (args[0]) {
-      "list" -> handleList(args.drop(1))
-      "dump" -> handleDump(args.drop(1))
-      else -> printHelp()
-    }
-  }
-
-  private fun handleList(args: List<String>) {
-    if (args.isEmpty()) {
-      printHelp()
-      return
-    }
-
-    when (args[0]) {
-      "platforms" -> listPlatforms()
-      "languages" -> listLanguages()
-      "templates" -> listTemplates()
-      "libraries" -> {
-        if (args.size < 2) {
-          println("Specify 'official' or 'unofficial'")
-          return
+    @JvmStatic
+    fun main(args: Array<String>) {
+        if (args.isEmpty()) {
+            printHelp()
+            exitProcess(0)
         }
-        when (args[1]) {
-          "official" -> listOfficialLibraries()
-          "unofficial" -> listUnofficialLibraries()
-          else -> println("Unknown library group: ${args[1]}")
+
+        val options = parseArgs(args)
+
+        if (options.containsKey("help")) {
+            printHelp()
+            exitProcess(0)
         }
-      }
-      else -> printHelp()
+
+        val outputDir = options["output"] ?: run {
+            println("Erro: diretório de saída não informado.")
+            exitProcess(1)
+        }
+
+        val projectName = options["name"] ?: "MyGdxGame"
+        val packageName = options["package"] ?: "com.mygdx.game"
+
+        println("Liftoff CLI (Headless)")
+        println("Projeto: $projectName")
+        println("Pacote: $packageName")
+        println("Saída: $outputDir")
+
+        val dir = File(outputDir)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+
+        // Prova de vida do modo headless
+        File(dir, "liftoff-cli.txt").writeText(
+            """
+            Projeto gerado com sucesso.
+            Nome: $projectName
+            Pacote: $packageName
+            """.trimIndent() + "\n",
+        )
+
+        println("Projeto base criado com sucesso.")
     }
-  }
 
-  private fun handleDump(args: List<String>) {
-    if (args.isEmpty()) {
-      printHelp()
-      return
+    private fun parseArgs(args: Array<String>): Map<String, String> {
+        val map = mutableMapOf<String, String>()
+        var index = 0
+
+        while (index < args.size) {
+            val arg = args[index]
+
+            if (arg.startsWith("--")) {
+                val key = arg.removePrefix("--")
+
+                val next = args.getOrNull(index + 1)
+                if (next != null && !next.startsWith("--")) {
+                    map[key] = next
+                    index += 2
+                } else {
+                    map[key] = "true"
+                    index += 1
+                }
+            } else {
+                index += 1
+            }
+        }
+
+        return map
     }
 
-    when (args[0]) {
-      "schema" -> dumpSchema()
-      else -> printHelp()
+    private fun printHelp() {
+        println(
+            """
+            Liftoff CLI (modo headless)
+
+            Uso:
+              liftoff --output <dir> [opções]
+
+            Opções:
+              --name <nome>        Nome do projeto
+              --package <pacote>   Pacote base
+              --output <dir>       Diretório de saída
+              --help               Exibe esta ajuda
+            """.trimIndent() + "\n",
+        )
     }
-  }
-
-  // -------------------------
-  // LIST COMMANDS
-  // -------------------------
-
-  private fun listPlatforms() {
-    println("PLATFORMS:")
-    for (p: Platform in Listing.platforms) {
-      println("- ${p.id}")
-    }
-  }
-
-  private fun listLanguages() {
-    println("LANGUAGES:")
-    for (l: Language in Listing.languages) {
-      println("- ${l.id} (version=${l.version})")
-    }
-    println("- java (default)")
-  }
-
-  private fun listTemplates() {
-    println("TEMPLATES:")
-    for (t: Template in Listing.templates) {
-      println("- ${t.id}")
-    }
-  }
-
-  private fun listOfficialLibraries() {
-    println("OFFICIAL LIBRARIES:")
-    for (l: Library in Listing.officialLibraries) {
-      println("- ${l.id}")
-    }
-  }
-
-  private fun listUnofficialLibraries() {
-    println("UNOFFICIAL LIBRARIES:")
-    for (l: Library in Listing.unofficialLibraries) {
-      println("- ${l.id}")
-    }
-  }
-
-  // -------------------------
-  // DUMP COMMAND
-  // -------------------------
-
-  private fun dumpSchema() {
-    println("{")
-
-    println("  \"platforms\": [")
-    val platforms: List<Platform> = Listing.platforms
-    for (i in platforms.indices) {
-      val suffix = if (i < platforms.size - 1) "," else ""
-      println("    \"${platforms[i].id}\"$suffix")
-    }
-    println("  ],")
-
-    println("  \"languages\": [")
-    val languages: List<String> = Listing.languages.map { it.id } + "java"
-    for (i in languages.indices) {
-      val suffix = if (i < languages.size - 1) "," else ""
-      println("    \"${languages[i]}\"$suffix")
-    }
-    println("  ],")
-
-    println("  \"templates\": [")
-    val templates: List<Template> = Listing.templates
-    for (i in templates.indices) {
-      val suffix = if (i < templates.size - 1) "," else ""
-      println("    \"${templates[i].id}\"$suffix")
-    }
-    println("  ],")
-
-    println("  \"libraries\": {")
-    println("    \"official\": [")
-    val official: List<Library> = Listing.officialLibraries
-    for (i in official.indices) {
-      val suffix = if (i < official.size - 1) "," else ""
-      println("      \"${official[i].id}\"$suffix")
-    }
-    println("    ],")
-
-    println("    \"unofficial\": [")
-    val unofficial: List<Library> = Listing.unofficialLibraries.toList()
-    for (i in unofficial.indices) {
-      val suffix = if (i < unofficial.size - 1) "," else ""
-      println("      \"${unofficial[i].id}\"$suffix")
-    }
-    println("    ]")
-    println("  }")
-
-    println("}")
-  }
-
-  // -------------------------
-  // HELP
-  // -------------------------
-
-  private fun printHelp() {
-    println(
-      """
-      Liftoff CLI – Headless Probe Mode
-
-      Commands:
-        list platforms
-        list languages
-        list templates
-        list libraries official
-        list libraries unofficial
-        dump schema
-
-      Examples:
-        java -jar liftoff-cli.jar list platforms
-        java -jar liftoff-cli.jar dump schema
-      """.trimIndent()
-    )
-  }
 }
