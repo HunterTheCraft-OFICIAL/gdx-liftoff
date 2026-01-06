@@ -1,75 +1,86 @@
-@file:JvmName("LiftoffCli")
-
 package gdx.liftoff
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files
-import com.badlogic.gdx.utils.GdxNativesLoader
-import gdx.liftoff.LiftoffConfig.Companion.presets
-import gdx.liftoff.LiftoffConfig.Companion.defaults
-import gdx.liftoff.data.project.Project
-import gdx.liftoff.data.project.ProjectLogger
+import gdx.liftoff.data.project.*
+import gdx.liftoff.data.platforms.*
+import gdx.liftoff.data.languages.*
+import gdx.liftoff.data.templates.*
 import java.io.File
 import kotlin.system.exitProcess
 
-fun main(arguments: Array<String>) {
-    // Inicializa Gdx headless
-    GdxNativesLoader.load()
-    Gdx.files = Lwjgl3Files()
+fun main(args: Array<String>) {
+    val presetName = args.firstOrNull()?.uppercase() ?: "DEFAULT"
+    val config = LiftoffConfig.DEFAULT_PRESETS[presetName] ?: LiftoffConfig.DEFAULT_CONFIG
 
-    // Seleciona preset
-    val presetName = if (arguments.isEmpty()) "DEFAULT" else arguments.first().uppercase()
-    val config = presets[presetName] ?: presets["DEFAULT"]!!
-
-    // Dados básicos do projeto
-    val basicData = gdx.liftoff.data.project.BasicProjectData(
+    // Criação de dados básicos do projeto
+    val basicData = BasicProjectData(
         name = config.projectName,
-        rootPackage = config.packageName,
+        rootPackage = config.rootPackage,
         mainClass = "Main",
-        destination = com.badlogic.gdx.files.FileHandle(File("build/dist/${config.projectName}")),
-        androidSdk = com.badlogic.gdx.files.FileHandle(File("."))
+        destination = File("build/dist/${config.projectName}"),
+        androidSdk = File(".")
     )
 
     // Dados avançados do projeto
-    val advancedData = gdx.liftoff.data.project.AdvancedProjectData(
-        version = defaults["gdxVersion"] as String,
-        gdxVersion = defaults["gdxVersion"] as String,
-        javaVersion = defaults["javaVersion"] as String,
-        gwtPluginVersion = defaults["gwtPluginVersion"] as String,
-        serverJavaVersion = defaults["javaVersion"] as String,
-        desktopJavaVersion = defaults["javaVersion"] as String,
+    val advancedData = AdvancedProjectData(
+        version = "1.0.0",
+        gdxVersion = "LATEST",
+        javaVersion = "17",
+        gwtPluginVersion = "2.2.7",
+        serverJavaVersion = "17",
+        desktopJavaVersion = "17",
         generateSkin = config.addSkin,
-        generateReadme = defaults["generateReadme"] as Boolean,
-        gradleTasks = arrayListOf(),
+        generateReadme = true,
+        gradleTasks = arrayListOf()
     )
 
-    // Dados de extensões
-    val extensions = gdx.liftoff.data.project.ExtensionsData(
-        officialExtensions = config.officialLibraries.map { gdx.liftoff.data.libraries.Library(it) },
-        thirdPartyExtensions = config.unofficialLibraries.map { gdx.liftoff.data.libraries.Library(it) },
+    // Mapear plataformas e linguagens
+    val platforms = config.platforms.mapNotNull { platformId ->
+        when (platformId.lowercase()) {
+            "core" -> Core()
+            "lwjgl3" -> Lwjgl3()
+            "android" -> Android()
+            "ios" -> IOS()
+            "gwt" -> GWT()
+            "teavm" -> TeaVM()
+            else -> null
+        }
+    }.associateBy { it.id }
+
+    val languages = config.languages.mapNotNull { lang ->
+        when (lang.lowercase()) {
+            "kotlin" -> Kotlin()
+            "java" -> Java()
+            else -> null
+        }
+    }
+
+    val extensions = ExtensionsData(
+        officialExtensions = config.officialExtensions.map { name -> Listing.officialLibraries.find { it.id == name } }.filterNotNull(),
+        thirdPartyExtensions = config.thirdPartyExtensions.map { name -> Listing.unofficialLibraries.find { it.id == name } }.filterNotNull()
     )
 
-    // Cria projeto
+    val template: Template = when (config.template.lowercase()) {
+        "ktx" -> KtxTemplate()
+        "kotlin-classic" -> KotlinClassicTemplate()
+        else -> ClassicTemplate()
+    }
+
     val project = Project(
         basic = basicData,
         advanced = advancedData,
-        platforms = config.platforms.associateBy { it },
-        languages = gdx.liftoff.data.project.LanguagesData(
-            config.languages.toMutableList(),
-            config.languages.associateWith { "LATEST" }
-        ),
+        platforms = platforms,
+        languages = LanguagesData(languages.toMutableList(), languages.associate { it.id to it.version }),
         extensions = extensions,
-        template = gdx.liftoff.data.templates.Template(config.template)
+        template = template
     )
 
-    // Gera projeto e inclui wrapper Gradle
     project.generate()
     project.includeGradleWrapper(NullLogger, executeGradleTasks = false)
 
+    println("✅ Projeto '${config.projectName}' gerado com sucesso!")
     exitProcess(0)
 }
 
-// Logger único para todo o CLI
 object NullLogger : ProjectLogger {
     override fun log(message: String) {}
     override fun logNls(bundleLine: String) {}
