@@ -63,14 +63,14 @@ object LiftoffCli {
 
   private fun listPlatforms() {
     println("PLATFORMS:")
-    Listing.platforms.forEach { p: Platform ->
+    for (p: Platform in Listing.platforms) {
       println("- ${p.id}")
     }
   }
 
   private fun listLanguages() {
     println("LANGUAGES:")
-    Listing.languages.forEach { l: Language ->
+    for (l: Language in Listing.languages) {
       println("- ${l.id} (version=${l.version})")
     }
     println("- java (default)")
@@ -78,21 +78,21 @@ object LiftoffCli {
 
   private fun listTemplates() {
     println("TEMPLATES:")
-    Listing.templates.forEach { t: Template ->
+    for (t: Template in Listing.templates) {
       println("- ${t.id}")
     }
   }
 
   private fun listOfficialLibraries() {
     println("OFFICIAL LIBRARIES:")
-    Listing.officialLibraries.forEach { l: Library ->
+    for (l: Library in Listing.officialLibraries) {
       println("- ${l.id}")
     }
   }
 
   private fun listUnofficialLibraries() {
     println("UNOFFICIAL LIBRARIES:")
-    Listing.unofficialLibraries.forEach { l: Library ->
+    for (l: Library in Listing.unofficialLibraries) {
       println("- ${l.id}")
     }
   }
@@ -105,30 +105,44 @@ object LiftoffCli {
     println("{")
 
     println("  \"platforms\": [")
-    Listing.platforms.joinToString(",\n") { "    \"${it.id}\"" }
-      .also { println(it) }
+    val platforms = Listing.platforms
+    for (i in platforms.indices) {
+      val suffix = if (i < platforms.size - 1) "," else ""
+      println("    \"${platforms[i].id}\"$suffix")
+    }
     println("  ],")
 
     println("  \"languages\": [")
-    (Listing.languages.map { it.id } + "java")
-      .joinToString(",\n") { "    \"$it\"" }
-      .also { println(it) }
+    val languages = Listing.languages.map { it.id } + "java"
+    for (i in languages.indices) {
+      val suffix = if (i < languages.size - 1) "," else ""
+      println("    \"${languages[i]}\"$suffix")
+    }
     println("  ],")
 
     println("  \"templates\": [")
-    Listing.templates.joinToString(",\n") { "    \"${it.id}\"" }
-      .also { println(it) }
+    val templates = Listing.templates
+    for (i in templates.indices) {
+      val suffix = if (i < templates.size - 1) "," else ""
+      println("    \"${templates[i].id}\"$suffix")
+    }
     println("  ],")
 
     println("  \"libraries\": {")
     println("    \"official\": [")
-    Listing.officialLibraries.joinToString(",\n") { "      \"${it.id}\"" }
-      .also { println(it) }
+    val official = Listing.officialLibraries
+    for (i in official.indices) {
+      val suffix = if (i < official.size - 1) "," else ""
+      println("      \"${official[i].id}\"$suffix")
+    }
     println("    ],")
 
     println("    \"unofficial\": [")
-    Listing.unofficialLibraries.joinToString(",\n") { "      \"${it.id}\"" }
-      .also { println(it) }
+    val unofficial = Listing.unofficialLibraries
+    for (i in unofficial.indices) {
+      val suffix = if (i < unofficial.size - 1) "," else ""
+      println("      \"${unofficial[i].id}\"$suffix")
+    }
     println("    ]")
     println("  }")
 
