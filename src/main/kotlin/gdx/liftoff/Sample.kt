@@ -56,11 +56,19 @@ enum class Preset {
     override val platforms: List<Platform> get() = listOf(Core(), Lwjgl3(), Android(), IOS(), GWT())
     override val languages: List<Language> = emptyList()
     override val officialExtensions: Optional<List<Library>>
-      get() = Optional.of(
-        listOf(
-          AI(), Ashley(), Box2D(), Box2DLights(), Bullet(), Controllers(), Freetype(), Tools()
+      get() =
+        Optional.of(
+          listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools(),
+          ),
         )
-      )
     override val thirdPartyExtensions: List<Library> = emptyList()
     override val template: Template get() = ClassicTemplate()
   },
@@ -72,11 +80,19 @@ enum class Preset {
     override val platforms: List<Platform> get() = listOf(Core(), Lwjgl3(), Android(), IOS(), TeaVM())
     override val languages: List<Language> get() = listOf(Kotlin())
     override val officialExtensions: Optional<List<Library>>
-      get() = Optional.of(
-        listOf(
-          AI(), Ashley(), Box2D(), Box2DLights(), Bullet(), Controllers(), Freetype(), Tools()
+      get() =
+        Optional.of(
+          listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools(),
+          ),
         )
-      )
     override val thirdPartyExtensions: List<Library> = emptyList()
     override val template: Template get() = KotlinClassicTemplate()
   },
@@ -88,11 +104,19 @@ enum class Preset {
     override val platforms: List<Platform> get() = listOf(Core(), Lwjgl3(), Android(), IOS())
     override val languages: List<Language> get() = listOf(Kotlin())
     override val officialExtensions: Optional<List<Library>>
-      get() = Optional.of(
-        listOf(
-          AI(), Ashley(), Box2D(), Box2DLights(), Bullet(), Controllers(), Freetype(), Tools()
+      get() =
+        Optional.of(
+          listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools(),
+          ),
         )
-      )
     override val thirdPartyExtensions: List<Library>
       get() = Listing.unofficialLibraries.filter { !it.official && it.repository === KtxRepository }
     override val template: Template get() = KtxTemplate()
@@ -106,11 +130,19 @@ enum class Preset {
     override val platforms: List<Platform> get() = listOf(Core(), Lwjgl3(), Android(), IOS(), TeaVM())
     override val languages: List<Language> get() = listOf(Kotlin())
     override val officialExtensions: Optional<List<Library>>
-      get() = Optional.of(
-        listOf(
-          AI(), Ashley(), Box2D(), Box2DLights(), Bullet(), Controllers(), Freetype(), Tools()
+      get() =
+        Optional.of(
+          listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools(),
+          ),
         )
-      )
     override val thirdPartyExtensions: List<Library>
       get() = Listing.unofficialLibraries.filter { library ->
         !library.official &&
@@ -129,11 +161,19 @@ enum class Preset {
     override val platforms: List<Platform> get() = listOf(Core(), Lwjgl3(), Android())
     override val languages: List<Language> = emptyList()
     override val officialExtensions: Optional<List<Library>>
-      get() = Optional.of(
-        listOf(
-          AI(), Ashley(), Box2D(), Box2DLights(), Bullet(), Controllers(), Freetype(), Tools()
+      get() =
+        Optional.of(
+          listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools(),
+          ),
         )
-      )
     override val thirdPartyExtensions: List<Library> = listOf(ShapeDrawer(), TenPatch(), Stripe())
     override val template: Template get() = ClassicTemplate()
   },
@@ -145,12 +185,21 @@ enum class Preset {
     override val platforms: List<Platform> get() = listOf(Core(), Lwjgl3(), GWT())
     override val languages: List<Language> = emptyList()
     override val officialExtensions: Optional<List<Library>>
-      get() = Optional.of(
-        listOf(
-          AI(), Ashley(), Box2D(), Box2DLights(), Bullet(), Controllers(), Freetype(), Tools()
+      get() =
+        Optional.of(
+          listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools(),
+          ),
         )
-      )
-    override val thirdPartyExtensions: List<Library> = listOf(ShapeDrawer(), TenPatch(), Stripe(), Formic(), RegExodus())
+    override val thirdPartyExtensions: List<Library> =
+      listOf(ShapeDrawer(), TenPatch(), Stripe(), Formic(), RegExodus())
     override val template: Template get() = ClassicTemplate()
   },
 
@@ -161,11 +210,19 @@ enum class Preset {
     override val platforms: List<Platform> get() = listOf(Core(), Lwjgl3(), TeaVM())
     override val languages: List<Language> = listOf(Kotlin())
     override val officialExtensions: Optional<List<Library>>
-      get() = Optional.of(
-        listOf(
-          AI(), Ashley(), Box2D(), Box2DLights(), Bullet(), Controllers(), Freetype(), Tools()
+      get() =
+        Optional.of(
+          listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools(),
+          ),
         )
-      )
     override val thirdPartyExtensions: List<Library> = listOf(ShapeDrawer(), TenPatch(), Stripe())
     override val template: Template get() = KotlinClassicTemplate()
   };
@@ -202,39 +259,43 @@ fun main(arguments: Array<String>) {
 
   val preset = getPreset(arguments)
   val officialExtensions = Listing.officialLibraries
-  val basicData = BasicProjectData(
-    name = preset.projectName,
-    rootPackage = preset.rootPackage,
-    mainClass = "Main",
-    destination = FileHandle(File("build/dist/sample")),
-    androidSdk = FileHandle(File(".")),
-  )
+  val basicData =
+    BasicProjectData(
+      name = preset.projectName,
+      rootPackage = preset.rootPackage,
+      mainClass = "Main",
+      destination = FileHandle(File("build/dist/sample")),
+      androidSdk = FileHandle(File(".")),
+    )
   val defaultJavaVersion = Java().version
   val defaultGwtVersion = "2.2.7"
-  val advancedData = AdvancedProjectData(
-    version = Configuration.VERSION,
-    gdxVersion = Version.VERSION,
-    javaVersion = defaultJavaVersion,
-    gwtPluginVersion = defaultGwtVersion,
-    serverJavaVersion = defaultJavaVersion,
-    desktopJavaVersion = defaultJavaVersion,
-    generateSkin = preset.addSkin,
-    generateReadme = true,
-    gradleTasks = arrayListOf(),
-  )
-  val extensions = ExtensionsData(
-    officialExtensions = preset.officialExtensions.orElse(officialExtensions),
-    thirdPartyExtensions = preset.thirdPartyExtensions,
-  )
+  val advancedData =
+    AdvancedProjectData(
+      version = Configuration.VERSION,
+      gdxVersion = Version.VERSION,
+      javaVersion = defaultJavaVersion,
+      gwtPluginVersion = defaultGwtVersion,
+      serverJavaVersion = defaultJavaVersion,
+      desktopJavaVersion = defaultJavaVersion,
+      generateSkin = preset.addSkin,
+      generateReadme = true,
+      gradleTasks = arrayListOf(),
+    )
+  val extensions =
+    ExtensionsData(
+      officialExtensions = preset.officialExtensions.orElse(officialExtensions),
+      thirdPartyExtensions = preset.thirdPartyExtensions,
+    )
 
-  val project = Project(
-    basic = basicData,
-    advanced = advancedData,
-    platforms = preset.platforms.associateBy { it.id },
-    languages = preset.languagesData,
-    extensions = extensions,
-    template = preset.template,
-  )
+  val project =
+    Project(
+      basic = basicData,
+      advanced = advancedData,
+      platforms = preset.platforms.associateBy { it.id },
+      languages = preset.languagesData,
+      extensions = extensions,
+      template = preset.template,
+    )
   project.generate()
   project.includeGradleWrapper(NullLogger, executeGradleTasks = false)
   exitProcess(0)
