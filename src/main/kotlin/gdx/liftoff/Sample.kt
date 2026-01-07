@@ -144,12 +144,13 @@ enum class Preset {
           ),
         )
     override val thirdPartyExtensions: List<Library>
-      get() = Listing.unofficialLibraries.filter { library ->
-        !library.official &&
-          library.repository === KtxRepository &&
-          !library.id.endsWith("Async") &&
-          listOf("artemis", "script").all { it !in library.id.lowercase() }
-      }
+      get() =
+        Listing.unofficialLibraries.filter { library ->
+          !library.official &&
+            library.repository === KtxRepository &&
+            !library.id.endsWith("Async") &&
+            listOf("artemis", "script").all { it !in library.id.lowercase() }
+        }
     override val template: Template get() = KtxTemplate()
     override val addSkin: Boolean = false
   },
@@ -198,8 +199,15 @@ enum class Preset {
             Tools(),
           ),
         )
-    override val thirdPartyExtensions: List<Library> =
-      listOf(ShapeDrawer(), TenPatch(), Stripe(), Formic(), RegExodus())
+    override val thirdPartyExtensions: List<Library>
+      get() =
+        listOf(
+          ShapeDrawer(),
+          TenPatch(),
+          Stripe(),
+          Formic(),
+          RegExodus(),
+        )
     override val template: Template get() = ClassicTemplate()
   },
 
@@ -225,7 +233,8 @@ enum class Preset {
         )
     override val thirdPartyExtensions: List<Library> = listOf(ShapeDrawer(), TenPatch(), Stripe())
     override val template: Template get() = KotlinClassicTemplate()
-  };
+  ,
+  ;
 
   abstract val projectName: String
   abstract val rootPackage: String
