@@ -1,0 +1,42 @@
+name: Liftoff Sample – Probe Mode
+
+on:
+  workflow_dispatch:
+
+jobs:
+  liftoff-sample:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Build Liftoff
+        run: ./gradlew clean build -x test
+
+      - name: Run Sample (default preset)
+        run: |
+          echo "=== RUNNING SAMPLE ==="
+          ./gradlew sample
+
+      - name: Inspect generated files
+        run: |
+          echo "=== TREE: build/dist ==="
+          find build/dist -maxdepth 4 -type d
+          echo "=== FILES ==="
+          find build/dist -type f | head -n 200
+
+      - name: Upload generated project artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: liftoff-sample-output
+          path: build/dist
