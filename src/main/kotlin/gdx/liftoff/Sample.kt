@@ -54,13 +54,14 @@ enum class Preset {
     override val projectName: String get() = "gdx-liftoff-demo"
     override val rootPackage: String get() = "gdx.liftoff"
     override val platforms: List<Platform>
-      get() = listOf(
-        Core(),
-        Lwjgl3(),
-        Android(),
-        IOS(),
-        GWT(),
-      )
+      get() =
+        listOf(
+          Core(),
+          Lwjgl3(),
+          Android(),
+          IOS(),
+          GWT(),
+        )
     override val languages: List<Language> = emptyList()
     override val officialExtensions: Optional<List<Library>>
       get() =
@@ -85,17 +86,19 @@ enum class Preset {
     override val projectName: String get() = "gdx-liftoff-demo-kotlin"
     override val rootPackage: String get() = "gdx.liftoff"
     override val platforms: List<Platform>
-      get() = listOf(
-        Core(),
-        Lwjgl3(),
-        Android(),
-        IOS(),
-        TeaVM(),
-      )
+      get() =
+        listOf(
+          Core(),
+          Lwjgl3(),
+          Android(),
+          IOS(),
+          TeaVM(),
+        )
     override val languages: List<Language>
-      get() = listOf(
-        Kotlin(),
-      )
+      get() =
+        listOf(
+          Kotlin(),
+        )
     override val officialExtensions: Optional<List<Library>>
       get() =
         Optional.of(
@@ -119,16 +122,18 @@ enum class Preset {
     override val projectName: String get() = "ktx-demo"
     override val rootPackage: String get() = "ktx.demo"
     override val platforms: List<Platform>
-      get() = listOf(
-        Core(),
-        Lwjgl3(),
-        Android(),
-        IOS(),
-      )
+      get() =
+        listOf(
+          Core(),
+          Lwjgl3(),
+          Android(),
+          IOS(),
+        )
     override val languages: List<Language>
-      get() = listOf(
-        Kotlin(),
-      )
+      get() =
+        listOf(
+          Kotlin(),
+        )
     override val officialExtensions: Optional<List<Library>>
       get() =
         Optional.of(
@@ -144,7 +149,8 @@ enum class Preset {
           ),
         )
     override val thirdPartyExtensions: List<Library>
-      get() = Listing.unofficialLibraries.filter { !it.official && it.repository === KtxRepository }
+      get() =
+        Listing.unofficialLibraries.filter { !it.official && it.repository === KtxRepository }
     override val template: Template get() = KtxTemplate()
     override val addSkin: Boolean = false
   },
@@ -154,17 +160,19 @@ enum class Preset {
     override val projectName: String get() = "ktx-demo-web"
     override val rootPackage: String get() = "ktx.demo"
     override val platforms: List<Platform>
-      get() = listOf(
-        Core(),
-        Lwjgl3(),
-        Android(),
-        IOS(),
-        TeaVM(),
-      )
+      get() =
+        listOf(
+          Core(),
+          Lwjgl3(),
+          Android(),
+          IOS(),
+          TeaVM(),
+        )
     override val languages: List<Language>
-      get() = listOf(
-        Kotlin(),
-      )
+      get() =
+        listOf(
+          Kotlin(),
+        )
     override val officialExtensions: Optional<List<Library>>
       get() =
         Optional.of(
@@ -196,11 +204,12 @@ enum class Preset {
     override val projectName: String get() = "gdx-android-dev-demo"
     override val rootPackage: String get() = "gdx.android"
     override val platforms: List<Platform>
-      get() = listOf(
-        Core(),
-        Lwjgl3(),
-        Android(),
-      )
+      get() =
+        listOf(
+          Core(),
+          Lwjgl3(),
+          Android(),
+        )
     override val languages: List<Language> = emptyList()
     override val officialExtensions: Optional<List<Library>>
       get() =
@@ -217,11 +226,12 @@ enum class Preset {
           ),
         )
     override val thirdPartyExtensions: List<Library>
-      get() = listOf(
-        ShapeDrawer(),
-        TenPatch(),
-        Stripe(),
-      )
+      get() =
+        listOf(
+          ShapeDrawer(),
+          TenPatch(),
+          Stripe(),
+        )
     override val template: Template get() = ClassicTemplate()
   },
 
@@ -230,11 +240,12 @@ enum class Preset {
     override val projectName: String get() = "gdx-gwt-dev-demo"
     override val rootPackage: String get() = "gdx.gwt"
     override val platforms: List<Platform>
-      get() = listOf(
-        Core(),
-        Lwjgl3(),
-        GWT(),
-      )
+      get() =
+        listOf(
+          Core(),
+          Lwjgl3(),
+          GWT(),
+        )
     override val languages: List<Language> = emptyList()
     override val officialExtensions: Optional<List<Library>>
       get() =
@@ -267,15 +278,17 @@ enum class Preset {
     override val projectName: String get() = "gdx-gwt-dev-demo"
     override val rootPackage: String get() = "gdx.gwt"
     override val platforms: List<Platform>
-      get() = listOf(
-        Core(),
-        Lwjgl3(),
-        TeaVM(),
-      )
+      get() =
+        listOf(
+          Core(),
+          Lwjgl3(),
+          TeaVM(),
+        )
     override val languages: List<Language>
-      get() = listOf(
-        Kotlin(),
-      )
+      get() =
+        listOf(
+          Kotlin(),
+        )
     override val officialExtensions: Optional<List<Library>>
       get() =
         Optional.of(
@@ -291,11 +304,12 @@ enum class Preset {
           ),
         )
     override val thirdPartyExtensions: List<Library>
-      get() = listOf(
-        ShapeDrawer(),
-        TenPatch(),
-        Stripe(),
-      )
+      get() =
+        listOf(
+          ShapeDrawer(),
+          TenPatch(),
+          Stripe(),
+        )
     override val template: Template get() = KotlinClassicTemplate()
   },
   ;
@@ -310,10 +324,11 @@ enum class Preset {
   open val addSkin: Boolean = true
 
   val languagesData: LanguagesData
-    get() = LanguagesData(
-      languages.toMutableList(),
-      languages.associate { it.id to it.version },
-    )
+    get() =
+      LanguagesData(
+        languages.toMutableList(),
+        languages.associate { it.id to it.version },
+      )
 }
 
 fun getPreset(arguments: Array<String>): Preset =
@@ -367,7 +382,10 @@ fun main(arguments: Array<String>) {
     Project(
       basic = basicData,
       advanced = advancedData,
-      platforms = preset.platforms.associateBy { it.id },
+      platforms =
+        preset.platforms.associateBy {
+          it.id
+        },
       languages = preset.languagesData,
       extensions = extensions,
       template = preset.template,
