@@ -59,7 +59,18 @@ enum class Preset {
             get() = listOf(Core(), Lwjgl3(), Android(), IOS(), GWT())
         override val languages: List<Language> = emptyList()
         override val officialExtensions: Optional<List<Library>>
-            get() = Optional.empty()
+    get() = Optional.of(
+        listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools()
+        )
+    )
         override val thirdPartyExtensions: List<Library> = emptyList()
         override val template: Template
             get() = ClassicTemplate()
@@ -76,7 +87,18 @@ enum class Preset {
         override val languages: List<Language>
             get() = listOf(Kotlin())
         override val officialExtensions: Optional<List<Library>>
-            get() = Optional.empty()
+    get() = Optional.of(
+        listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools()
+        )
+    )
         override val thirdPartyExtensions: List<Library> = emptyList()
         override val template: Template
             get() = KotlinClassicTemplate()
@@ -93,7 +115,18 @@ enum class Preset {
         override val languages: List<Language>
             get() = listOf(Kotlin())
         override val officialExtensions: Optional<List<Library>>
-            get() = Optional.empty()
+    get() = Optional.of(
+        listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools()
+        )
+    )
         override val thirdPartyExtensions: List<Library>
             get() {
                 return Listing.unofficialLibraries.filter { library ->
@@ -116,7 +149,18 @@ enum class Preset {
         override val languages: List<Language>
             get() = listOf(Kotlin())
         override val officialExtensions: Optional<List<Library>>
-            get() = Optional.empty()
+    get() = Optional.of(
+        listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools()
+        )
+    )
         override val thirdPartyExtensions: List<Library>
             get() {
                 return Listing.unofficialLibraries.filter { library ->
@@ -143,7 +187,18 @@ enum class Preset {
             get() = listOf(Core(), Lwjgl3(), Android())
         override val languages: List<Language> = emptyList()
         override val officialExtensions: Optional<List<Library>>
-            get() = Optional.of(listOf(AI(), Ashley(), Box2D(), Box2DLights(), Bullet(), Controllers(), Freetype(), Tools()))
+    get() = Optional.of(
+        listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools()
+        )
+    )
         override val thirdPartyExtensions: List<Library> = listOf(ShapeDrawer(), TenPatch(), Stripe())
         override val template: Template
             get() = ClassicTemplate()
@@ -160,7 +215,18 @@ enum class Preset {
             get() = listOf(Core(), Lwjgl3(), GWT())
         override val languages: List<Language> = emptyList()
         override val officialExtensions: Optional<List<Library>>
-            get() = Optional.of(listOf(Box2D()))
+    get() = Optional.of(
+        listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools()
+        )
+    )
         override val thirdPartyExtensions: List<Library> = listOf(ShapeDrawer(), TenPatch(), Stripe(), Formic(), RegExodus())
         override val template: Template
             get() = ClassicTemplate()
@@ -177,7 +243,18 @@ enum class Preset {
             get() = listOf(Core(), Lwjgl3(), TeaVM())
         override val languages: List<Language> = listOf(Kotlin())
         override val officialExtensions: Optional<List<Library>>
-            get() = Optional.of(listOf(Box2D()))
+    get() = Optional.of(
+        listOf(
+            AI(),
+            Ashley(),
+            Box2D(),
+            Box2DLights(),
+            Bullet(),
+            Controllers(),
+            Freetype(),
+            Tools()
+        )
+    )
         override val thirdPartyExtensions: List<Library> = listOf(ShapeDrawer(), TenPatch(), Stripe())
         override val template: Template
             get() = KotlinClassicTemplate()
